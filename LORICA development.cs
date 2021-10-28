@@ -38,7 +38,7 @@ using System.Diagnostics;
 using System.Numerics;
 using MathNet.Numerics;
 using MathNet.Numerics.IntegralTransforms;
-using Smallwisdom.Windows.Forms; //added this up here
+using Smallwisdom.Windows.Forms; //added this up here changed some stuff
 
 
 namespace LORICA4
