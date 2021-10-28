@@ -38,6 +38,7 @@ using System.Diagnostics;
 using System.Numerics;
 using MathNet.Numerics;
 using MathNet.Numerics.IntegralTransforms;
+using Smallwisdom.Windows.Forms; //added this up here
 
 
 namespace LORICA4
@@ -194,7 +195,7 @@ namespace LORICA4
         private System.Windows.Forms.Button start_button;
         private System.Windows.Forms.Button End_button;
         private System.Windows.Forms.ToolTip toolTip1;
-        private Smallwisdom.Windows.Forms.ZoomPanImageBox Mapwindow;
+        private ZoomPanImageBox Mapwindow; //change made here
         private MenuItem Mapselector;
         private MenuItem Menu_map_total_sediment;
         private MenuItem Menu_map_waterflow;
