@@ -12829,9 +12829,9 @@ namespace LORICA4
                 timeseries_matrix[t, timeseries_order[17]] = total_fine_neoformed_mass_kg;
             }
 
-        }
+        } 
 
-        void soil_bioturbation()
+        void soil_bioturbation() //testing
         {
 
             Debug.WriteLine("\n--bioturbation--\n");
