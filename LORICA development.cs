@@ -11917,46 +11917,7 @@ namespace LORICA4
             double depth_m;  // keep better track of this, currently not OK yet
             try
             {
-                /*
-                //displaysoil(0, 0);
-                for (row = 0; row < nr; row++)
-                {
-                    for (col = 0; col < nc; col++)
-                    {
-                        if (dtm[row, col] != -9999)
-                        {
-                            update_all_soil_thicknesses(row, col);
-                            update_all_soil_thicknesses(row, col);
-                            // Debug.WriteLine("suscl2");
-                            if (NA_in_soil(row, col)) { Debugger.Break(); }
-
-
-                            depth_m = 0;
-                            for (layer = 0; layer < max_soil_layers; layer++)
-                            {
-                                ////update the layers' thickness now that textures and organic matter amounts have changed (if there is anything in the layer at all).
-                                //if (!(texture_kg[row, col, layer, 0] == 0 && texture_kg[row, col, layer, 1] == 0 && texture_kg[row, col, layer, 2] == 0 && texture_kg[row, col, layer, 3] == 0 && texture_kg[row, col, layer, 4] == 0 && young_SOM_kg[row, col, layer] == 0 && old_SOM_kg[row, col, layer] == 0))
-                                //{
-                                //layerthickness_m[row, col, layer] = thickness_calc(row, col, layer);
-                                //layerthickness_m[row, col, layer] = thickness_calc(row, col, layer);
-                                //if (layerthickness_m[row,col,layer] < 0) { Debugger.Break(); } //MMS
-                                //find_negative_texture_rcl(row, col, layer); //MMS
-                                //}
-                                if (timeseries.timeseries_soil_mass_checkbox.Checked && System.Convert.ToInt32(timeseries.timeseries_soil_cell_row.Text) == row && System.Convert.ToInt32(timeseries.timeseries_soil_cell_col.Text) == col)
-                                {
-                                    local_soil_mass_kg += texture_kg[row, col, layer, 0] + texture_kg[row, col, layer, 1] + texture_kg[row, col, layer, 2] + texture_kg[row, col, layer, 3] + texture_kg[row, col, layer, 4] + young_SOM_kg[row, col, layer] + old_SOM_kg[row, col, layer];
-                                    if (local_soil_mass_kg < 0) { Debugger.Break(); } //MMS
-                                }
-                                if (timeseries.timeseries_soil_mass_checkbox.Checked && layer == 0 && texture_kg[row, col, layer, 0] / (texture_kg[row, col, layer, 0] + texture_kg[row, col, layer, 1] + texture_kg[row, col, layer, 2] + texture_kg[row, col, layer, 3] + texture_kg[row, col, layer, 4] + young_SOM_kg[row, col, layer] + old_SOM_kg[row, col, layer]) > System.Convert.ToDouble(timeseries.timeseries_soil_coarser_fraction_textbox.Text))
-                                {
-                                    number_soil_coarser_than++;
-                                }
-                            }
-
-                        }
-                    }
-                } 
-                */
+                
 
                 var options = new ParallelOptions()
                 {
@@ -11989,23 +11950,23 @@ namespace LORICA4
                             //Debug.WriteLine("soil before splitting");
                             // if (row == 0 & col == 0) { displaysoil(row, col); }
                             depth_m = 0;
-                            numberoflayers = 0;
-                            bool boolsplit = false;
-                            bool boolcombine = false;
+                            //numberoflayers = 0; //not used
+                            //bool boolsplit = false; //not used
+                            //bool boolcombine = false; //not used
                             for (int layer = 0; layer < (max_soil_layers - 1); layer++)
                             {
                                 if (total_layer_mass(row, col, layer) > 0)
                                 {
 
                                     //Debug.WriteLine("depth is now " + depth + " for lyr " +  layer);
-                                    numberoflayers++;
+                                    //numberoflayers++;
                                     if (layer == 0)
                                     {
                                         if (layerthickness_m[row, col, layer] < 0.001 | total_soil_mass(row, col) < 0.001) // smaller than one mm, lighter than 1 gram -> merge with layer below, to avoid numerical problems when always a fraction leaves the profile (e.g. with creep)
                                         {
                                             combine_layers(row, col, layer, layer + 1);
                                             update_all_soil_thicknesses(row, col);
-                                            boolcombine = true;
+                                            //boolcombine = true;
                                             if (Math.Round(old_soil_mass, 6) != Math.Round(total_soil_mass(row, col), 6))
                                             {
                                                 Debug.WriteLine("err_uscl9");
@@ -12020,7 +11981,7 @@ namespace LORICA4
                                             // Debug.WriteLine("d_layer {0}", layerthickness_m[row, col, layer]);
                                             update_all_soil_thicknesses(row, col);
                                             // Debug.WriteLine("d_layer {0}", layerthickness_m[row, col, layer] );
-                                            boolsplit = true;
+                                            //boolsplit = true;
                                         }
                                     }
                                     if (layer != 0)
@@ -20432,6 +20393,7 @@ Example: rainfall.asc can look like:
             {
                 //Debug.WriteLine(" Sorting test successful ");
             }
+            Console.WriteLine("Finished Comb sort");
         }
 
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
