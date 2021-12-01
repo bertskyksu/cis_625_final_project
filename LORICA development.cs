@@ -11926,11 +11926,11 @@ namespace LORICA4
 
                 //displaysoil(0, 0);
                 depth_m = 0;
-                //Parallel.For(0, nr, options, row =>
-                // {
-                for (row = 0; row < nr; row++)
-                {
-                    for (col = 0; col < nc; col++)
+                Parallel.For(0, nr, options, row =>
+                 {
+                //for (row = 0; row < nr; row++)
+                //{
+                    for (int col = 0; col < nc; col++)
                     {
                         if (dtm[row, col] != -9999)
                         {
@@ -11962,11 +11962,14 @@ namespace LORICA4
                                     //numberoflayers++;
                                     if (layer == 0)
                                     {
-                                        if (layerthickness_m[row, col, layer] < 0.001 | total_soil_mass(row, col) < 0.001) // smaller than one mm, lighter than 1 gram -> merge with layer below, to avoid numerical problems when always a fraction leaves the profile (e.g. with creep)
+                                        //use instead old_soil_mass
+                                        //if (layerthickness_m[row, col, layer] < 0.001 | total_soil_mass(row, col) < 0.001)
+                                        if (layerthickness_m[row, col, layer] < 0.001 | old_soil_mass < 0.001) // smaller than one mm, lighter than 1 gram -> merge with layer below, to avoid numerical problems when always a fraction leaves the profile (e.g. with creep)
                                         {
                                             combine_layers(row, col, layer, layer + 1);
                                             update_all_soil_thicknesses(row, col);
                                             //boolcombine = true;
+
                                             if (Math.Round(old_soil_mass, 6) != Math.Round(total_soil_mass(row, col), 6))
                                             {
                                                 Debug.WriteLine("err_uscl9");
@@ -11984,7 +11987,8 @@ namespace LORICA4
                                             //boolsplit = true;
                                         }
                                     }
-                                    if (layer != 0)
+                                    //if (layer != 0)
+                                    else
                                     {
                                         if (layerthickness_m[row, col, layer] < (dz_standard * (1 - tolerance))) // Lower end, combine
                                         {
@@ -11996,7 +12000,7 @@ namespace LORICA4
                                                 }
                                                 combine_layers(row, col, layer, layer + 1);
                                                 update_all_soil_thicknesses(row, col);
-                                                boolcombine = true;
+                                                //boolcombine = true;
                                                 if (Math.Round(old_soil_mass, 6) != Math.Round(total_soil_mass(row, col), 6))
                                                 {
                                                     Debug.WriteLine("err_uscl11");
@@ -12011,7 +12015,7 @@ namespace LORICA4
                                                 combine_layers(row, col, layer - 1, layer);
                                                 layer--;  //because we combined with the previous one, the current one has been replaced with one that has not yet been considered
                                                 update_all_soil_thicknesses(row, col);
-                                                boolcombine = true;
+                                                //boolcombine = true;
                                                 // if (Math.Round(old_soil_mass, 6) != Math.Round(total_soil_mass(row, col), 6)) { Debugger.Break(); }
                                                 if (Math.Abs(old_soil_mass - total_soil_mass(row, col)) > 0.00001)
                                                 {
@@ -12034,7 +12038,7 @@ namespace LORICA4
                                           // Debug.WriteLine("splitting after combining 1");
                                             split_layer(row, col, layer, depth_m);
                                             update_all_soil_thicknesses(row, col);
-                                            boolsplit = true;
+                                            //boolsplit = true;
                                             // if (Math.Abs(old_soil_mass-total_soil_mass(row, col))>0.00000001) { Debugger.Break(); }
                                         }
                                         if (Math.Abs(old_soil_mass - total_soil_mass(row, col)) > 0.00001)
@@ -12099,8 +12103,8 @@ namespace LORICA4
                             dz_soil[row, col] += new_thickness - old_thickness;
                         } // end dtm!=-9999
                     } // end col
-                      //}); // end row Parallel.For
-                } //end row
+                   }); // end row Parallel.For
+                //} //end row
                 if (timeseries.total_average_soilthickness_checkbox.Checked) { total_average_soilthickness_m /= number_of_data_cells; }
             }
             catch
@@ -12172,7 +12176,7 @@ namespace LORICA4
                 // Debug.WriteLine("Total soil mass: {0}", old_soil_mass); displaysoil(rowwer, coller); 
                 // Debug.WriteLine("cl0");
                 //Debug.WriteLine("total soil mass = " + total_soil_mass(rowwer, coller));
-                for (i = 0; i < 5; i++)
+                for (int i = 0; i < 5; i++)
                 {
                     texture_kg[rowwer, coller, lay1, i] += texture_kg[rowwer, coller, lay2, i];
                     texture_kg[rowwer, coller, lay2, i] = 0;// set to zero. otherwise the shifting of the layers doesn't work
@@ -12188,12 +12192,13 @@ namespace LORICA4
 
                 //Debug.WriteLine("cl1");
                 //Debug.WriteLine("total soil mass = " + total_soil_mass(rowwer, coller));
-                layerthickness_m[row, col, lay1] = thickness_calc(row, col, lay1);    // thickness_calc uses a pdf to calculate bulk density and hence layer thickness
+                //layerthickness_m[row, col, lay1] = thickness_calc(row, col, lay1);    // thickness_calc uses a pdf to calculate bulk density and hence layer thickness
+                layerthickness_m[rowwer, coller, lay1] = thickness_calc(rowwer, coller, lay1);
 
                 for (int layert = lay2; layert < max_soil_layers - 1; layert++) // for all underlying layers, shift one up (since there is space anyway)
                 {
                     // Debug.WriteLine(layert);
-                    for (i = 0; i < 5; i++)
+                    for (int i = 0; i < 5; i++)
                     {
                         texture_kg[rowwer, coller, layert, i] = texture_kg[rowwer, coller, layert + 1, i];
                     }
@@ -12202,7 +12207,7 @@ namespace LORICA4
                 }
 
                 //now set the last layer to sentinel value of -1
-                for (i = 0; i < 5; i++)
+                for (int i = 0; i < 5; i++)
                 {
                     texture_kg[rowwer, coller, max_soil_layers - 1, i] = 0;
                 }
@@ -12485,6 +12490,7 @@ namespace LORICA4
         {
             try
             {
+                
                 double max_layer_difference, current_difference, maximum_allowed_thickness;
                 //splitting will increase the number of layers. If this splits beyond the max number of layers, then combine the two most similar ones 
                 int laynum, combininglayer = -1;
@@ -12537,7 +12543,7 @@ namespace LORICA4
                                                                                   //This means that layer laynum+1, into which we want to split, will be evacuated and will give its values to laynum+2;
                 {
                     // Debug.WriteLine("sl2a, laynum = "+laynum+", lay1+2 = "+lay1 + 2+"tex lay 19 =" + texture_kg[rowwer,coller,19,2]);
-                    for (i = 0; i < 5; i++)
+                    for (int i = 0; i < 5; i++)
                     {
                         texture_kg[rowwer, coller, laynum, i] = texture_kg[rowwer, coller, laynum - 1, i];
                     }
@@ -12552,9 +12558,10 @@ namespace LORICA4
                 //Debug.WriteLine(" moved layers one down to make space for split layer ");
                 if ((lay1 + 1) == (max_soil_layers - 1))
                 {
-                    double div = 0.1 / (layerthickness_m[row, col, lay1]); // aim to have the split layer at 0.1 m
+                    //double div = 0.1 / (layerthickness_m[row, col, lay1]); // aim to have the split layer at 0.1 m
+                    double div = 0.1 / (layerthickness_m[rowwer, coller, lay1]); // aim to have the split layer at 0.1 m
                     if (div > 1) { div = 1; }
-                    for (i = 0; i < 5; i++)
+                    for (int i = 0; i < 5; i++)
                     {
                         texture_kg[rowwer, coller, lay1 + 1, i] += texture_kg[rowwer, coller, lay1, i] * (1 - div); texture_kg[rowwer, coller, lay1, i] *= div;
                         if (double.IsNaN(texture_kg[rowwer, coller, lay1, i]))
@@ -12574,7 +12581,7 @@ namespace LORICA4
                 }
                 else // even splitting
                 {
-                    for (i = 0; i < 5; i++)
+                    for (int i = 0; i < 5; i++)
                     {
                         texture_kg[rowwer, coller, lay1 + 1, i] = texture_kg[rowwer, coller, lay1, i] / 2; texture_kg[rowwer, coller, lay1, i] /= 2;
                     }
@@ -12588,7 +12595,8 @@ namespace LORICA4
             }
             catch
             {
-                Debug.WriteLine("Failed at splitting layer at row {0}, col {1} at time {2}", row, col, t);
+                //Debug.WriteLine("Failed at splitting layer at row {0}, col {1} at time {2}", row, col, t);
+                Debug.WriteLine("Failed at splitting layer at row {0}, col {1} at time {2}", rowwer, coller, t);
             }
         }
 
