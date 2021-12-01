@@ -20251,7 +20251,7 @@ Example: rainfall.asc can look like:
         }
 
         
-        /// <summary>
+        /*/// <summary>
         /// This is insertion sort, but named as "comb_sort" so as not to require renaming all the calls to comb_sort
         /// Potential replacement for comb_sort?
         /// </summary>
@@ -20336,7 +20336,7 @@ Example: rainfall.asc can look like:
                 }  // end while
                    //if (gap < 4) { Debug.WriteLine("i " + i + " gap " + gap + " tot swaps " + total_swaps); }
             } //end while*/
-            int sorting_error = 0;
+            /*int sorting_error = 0;
             for (i = 0; i < number_of_data_cells - 1; i++)
             {
                 if (index[i] > index[i + 1]) { sorting_error = 1; }
@@ -20349,9 +20349,9 @@ Example: rainfall.asc can look like:
             {
                 //Debug.WriteLine(" Sorting test successful ");
             }
-        }
+        }*/
 
-        /*private void comb_sort()      //sorts the data cells in a dtm in order of increasing altitude
+        private void comb_sort()      //sorts the data cells in a dtm in order of increasing altitude
         {
             combSortCounter++;
             // comb sorting by Wlodek Dobosiewicz in 1980
@@ -20437,7 +20437,7 @@ Example: rainfall.asc can look like:
             {
                 //Debug.WriteLine(" Sorting test successful ");
             }
-        }*/
+        }
 
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
