@@ -11286,14 +11286,14 @@ namespace LORICA4
 
                             if (total_layer_mass(row2, col2, layert + 1) > 0) { full_layer_shift = true; }
                             // Debug.WriteLine(layert);
-                            for (i = 0; i < 5; i++)
+                            for (int i = 0; i < 5; i++)
                             {
                                 texture_kg[row2, col2, layert, i] = texture_kg[row2, col2, layert + 1, i];
                             }
                             old_SOM_kg[row2, col2, layert] = old_SOM_kg[row2, col2, layert + 1];
                             young_SOM_kg[row2, col2, layert] = young_SOM_kg[row2, col2, layert + 1];
                         }
-                        for (i = 0; i < 5; i++)
+                        for (int i = 0; i < 5; i++)
                         {
                             texture_kg[row2, col2, max_soil_layers - 1, i] = 0;
                         }
@@ -12143,7 +12143,7 @@ namespace LORICA4
             try
             {
                 // double average_property_value = 0, property_difference = 0, sum_property_difference = 0;
-                for (i = 0; i < 5; i++)
+                for (int i = 0; i < 5; i++)
                 {
                     //account for total soil mass
                     average_property_value = (texture_kg[rowwer, coller, lay1, i] + texture_kg[rowwer, coller, lay2, i]) / 2;
