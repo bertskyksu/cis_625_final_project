@@ -19442,7 +19442,7 @@ Example: rainfall.asc can look like:
                     }
 
                 } // exit point for consecutive runs
-
+                Console.WriteLine("finished main loop");
 
             } // end try
             catch
