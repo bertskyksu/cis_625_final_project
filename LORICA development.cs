@@ -20217,7 +20217,108 @@ Example: rainfall.asc can look like:
 
         }
 
-        private void comb_sort()      //sorts the data cells in a dtm in order of increasing altitude
+        
+        /// <summary>
+        /// This is insertion sort, but named as "comb_sort" so as not to require renaming all the calls to comb_sort
+        /// Potential replacement for comb_sort?
+        /// </summary>
+        private void comb_sort()
+        {
+            this.InfoStatusPanel.Text = "sorting";
+            int i = 0;
+            double dtm_temp = 0;
+            int row_temp = 0, col_temp = 0;
+            string rowcol_temp;
+            //Debug.WriteLine("sorting. nr " + nr + " nc " + nc + " t " + t);
+            if (t == t_intervene)  // only in the first timestep;
+            {
+                //Debug.WriteLine("normal sorting. nr " + nr + " nc " + nc + " t " + t);
+                number_of_data_cells = 0;
+                for (row = 0; row < nr; row++)  // why not do this only in the first timestep? And use the existing one as input in subsequent timesteps?
+                {
+                    for (col = 0; col < nc; col++)
+                    {
+                        if (dtm[row, col] != -9999)
+                        {
+                            index[i] = dtm[row, col]; row_index[i] = row; col_index[i] = col; rowcol_index[i] = row.ToString() + "." + col.ToString();
+                            i++;
+                        }
+                    }
+                }
+                number_of_data_cells = i;
+            }
+            else
+            {
+                //Debug.WriteLine("alternative sorting. nr " + nr + " nc " + nc + " t " + t);
+                for (i = 0; i < number_of_data_cells; i++)
+                {
+                    index[i] = dtm[row_index[i], col_index[i]];     //merely update the existing index with the adapted altitudes and then sort     
+                }
+            }
+
+            // Actual insertion sort loop
+            for (int j = 0; j < index.Length; j++)
+            {
+                int k = j;
+                double temp = index[k];
+                while (k > 0 && temp < index[k - 1])
+                {
+                    index[k] = index[k - 1];
+                    k--;
+                }
+                index[k] = temp;
+            }
+            //displayonscreen(0, 0);
+            this.InfoStatusPanel.Text = "data cells: " + number_of_data_cells;
+            //Debug.WriteLine("\n--sorting overview--");
+            //Debug.WriteLine("Sorting " + number_of_data_cells + " cells");
+            /*long gap = number_of_data_cells;
+            bool swaps;
+            long total_swaps = 0;
+            //while (gap > 1 && swaps == true)  // in freak? situations, swaps may be false for gap = x, but true for subsequent values of gap
+            while (gap > 1)
+            {
+                if (gap > 1)
+                {
+                    if (gap == 2) { gap = 1; }
+                    gap = Convert.ToInt64(gap / 1.2);
+                }
+                i = 0;
+                swaps = false;
+                //this.InfoStatusPanel.Text = "i " + i + " gap " + gap + " tot swaps " + total_swaps;
+                //Debug.WriteLine("i " + i + " gap " + gap + " tot swaps " + total_swaps);
+                while (i + gap < number_of_data_cells)
+                {
+                    //if (gap == Convert.ToInt64(number_of_data_cells / 1.2) && i < 10) {Debug.WriteLine("    i " + i + " gap " + gap + " tot swaps " + total_swaps + " alt1 " + index[i] + " (" + row_index[i] + "," + col_index[i] + ") alt2 " + index[i+gap] + " (" + row_index[i+gap] + "," + col_index[i+gap] + ")"); }
+                    if (index[i] > index[i + gap])
+                    {
+                        dtm_temp = index[i]; index[i] = index[i + gap]; index[i + gap] = dtm_temp;
+                        row_temp = row_index[i]; row_index[i] = row_index[i + gap]; row_index[i + gap] = row_temp;
+                        col_temp = col_index[i]; col_index[i] = col_index[i + gap]; col_index[i + gap] = col_temp;
+                        rowcol_temp = rowcol_index[i]; rowcol_index[i] = rowcol_index[i + gap]; rowcol_index[i + gap] = rowcol_temp;
+                        swaps = true;
+                        total_swaps++;
+                    } // end if
+                    i++;
+                }  // end while
+                   //if (gap < 4) { Debug.WriteLine("i " + i + " gap " + gap + " tot swaps " + total_swaps); }
+            } //end while*/
+            int sorting_error = 0;
+            for (i = 0; i < number_of_data_cells - 1; i++)
+            {
+                if (index[i] > index[i + 1]) { sorting_error = 1; }
+            }
+            if (sorting_error == 1)
+            {
+                Debug.WriteLine(" Sorting error in insertion_sort ");
+            }
+            else
+            {
+                //Debug.WriteLine(" Sorting test successful ");
+            }
+        }
+
+        /*private void comb_sort()      //sorts the data cells in a dtm in order of increasing altitude
         {
             // comb sorting by Wlodek Dobosiewicz in 1980
             // http://en.wikipedia.org/wiki/Comb_sort
@@ -20302,7 +20403,7 @@ Example: rainfall.asc can look like:
             {
                 //Debug.WriteLine(" Sorting test successful ");
             }
-        }
+        }*/
 
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
