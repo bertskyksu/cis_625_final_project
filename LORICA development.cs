@@ -20007,7 +20007,11 @@ Example: rainfall.asc can look like:
                 try
                 {
                     //Debug.WriteLine("writing all soils");
-                    writeallsoils();
+                    if ((run_number == maxruns - 1) && (t == end_time - 1)) //maybe double check to see if it hits the last run properly
+                    {
+                        writeallsoils();
+                    }
+                    //writeallsoils();
                 }
                 catch
                 {
