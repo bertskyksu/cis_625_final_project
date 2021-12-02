@@ -12716,7 +12716,7 @@ namespace LORICA4
                 {
                     for (int layer = 0; layer < max_soil_layers; layer++)
                     {
-                        if(TextBox.Text)
+                       // if(TextBox.Text)
                     }
                 }
             }
