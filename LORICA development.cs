@@ -11597,6 +11597,7 @@ namespace LORICA4
         }
          * */ //aangepast voor tree fall, maar met fout erin
 
+        /*
         void soil_update_split_and_combine_layers_standard()
         {
             //where at the end of soil development, splitting and combining of soil layers is performed.
@@ -11877,6 +11878,7 @@ namespace LORICA4
 
 
         }
+        */
 
         void soil_update_split_and_combine_layers()
         {
@@ -11905,18 +11907,26 @@ namespace LORICA4
 
             //displaysoil(0,0);
             double mass_before = total_catchment_mass();
-            total_average_soilthickness_m = 0;
-            number_soil_thicker_than = 0;
-            number_soil_coarser_than = 0;
-            local_soil_depth_m = 0;
-            local_soil_mass_kg = 0;
+
+            total_average_soilthickness_m = 0; //race condition 1
+            number_soil_thicker_than = 0; //race condition 2
+            number_soil_coarser_than = 0; //race condition 3
+            local_soil_depth_m = 0; //race condition 4
+            local_soil_mass_kg = 0; //race condition 5
 
             //int layer;
             int numberoflayers = 0;
             double depth_m;  // keep better track of this, currently not OK yet
             try
             {
-                
+
+                //parallel array holders for each global variable
+                double[] total_average_soilthickness_m_array = new double[nr];
+                int[] number_soil_thicker_than_array = new int[nr]; //race condition 2
+                int[] number_soil_coarser_than_array = new int[nr];
+                double[] local_soil_depth_m_array = new double[nr];
+                double[] local_soil_mass_kg_array = new double[nr]; //this even used?
+
 
                 var options = new ParallelOptions()
                 {
@@ -11927,9 +11937,14 @@ namespace LORICA4
                 depth_m = 0;
                 Parallel.For(0, nr, options, row =>
                  {
-                //for (row = 0; row < nr; row++)
-                //{
-                    for (int col = 0; col < nc; col++)
+                     //for (row = 0; row < nr; row++)
+                     //{
+
+                     double old_thickness;
+                     double new_thickness;
+                     double old_soil_mass;
+                     double new_soil_mass;
+                     for (int col = 0; col < nc; col++)
                     {
                         if (dtm[row, col] != -9999)
                         {
@@ -11938,13 +11953,13 @@ namespace LORICA4
 
                             update_all_soil_thicknesses(row, col);
 
-                            //if (NA_in_soil(row, col))
-                            //{
-                            //    Debug.WriteLine("err_uscl8");
-                            //}
+                             //if (NA_in_soil(row, col))
+                             //{
+                             //    Debug.WriteLine("err_uscl8");
+                             //}
 
 
-                            double old_soil_mass = total_soil_mass(row, col), new_soil_mass;
+                            old_soil_mass = total_soil_mass(row, col);
                             // Debug.WriteLine("suscl0" + row + ", " + col + ", " + t + " " + total_soil_mass(row, col));
                             //Debug.WriteLine("soil before splitting");
                             // if (row == 0 & col == 0) { displaysoil(row, col); }
@@ -12084,18 +12099,25 @@ namespace LORICA4
                                 Debug.WriteLine("err_uscl20");
 
                             }
-                            if (timeseries.timeseries_number_soil_thicker_checkbox.Checked && System.Convert.ToDouble(timeseries.timeseries_soil_thicker_textbox.Text) < depth_m) { number_soil_thicker_than++; } //race condition
-                            if (timeseries.total_average_soilthickness_checkbox.Checked) { total_average_soilthickness_m += depth_m; } //race condition
+                            if (timeseries.timeseries_number_soil_thicker_checkbox.Checked && System.Convert.ToDouble(timeseries.timeseries_soil_thicker_textbox.Text) < depth_m) 
+                             {
+                                 number_soil_coarser_than_array[row]++; //race condition 2
+                             } 
+                            if (timeseries.total_average_soilthickness_checkbox.Checked) 
+                             {
+                                 total_average_soilthickness_m_array[row] += depth_m; //race condition 1
+                             } 
                             if (timeseries.timeseries_soil_depth_checkbox.Checked && System.Convert.ToInt32(timeseries.timeseries_soil_cell_row.Text) == row && System.Convert.ToInt32(timeseries.timeseries_soil_cell_col.Text) == col)
                             {
-                                local_soil_depth_m = depth_m; //race condition ???
+                                 //local_soil_depth_m = depth_m; //race condition 4 (weird since it just gets over 
+                                 local_soil_depth_m_array[row] = depth_m;
                             }
 
                             //Debug.WriteLine("suscl0" + row + ", " + col + ", " + t + " " + total_soil_mass(row, col));
                             // update dtm and soil thickness map //MMS
                             update_all_soil_thicknesses(row, col);
-                            double old_thickness = soildepth_m[row, col];
-                            double new_thickness = total_soil_thickness(row, col);
+                            old_thickness = soildepth_m[row, col];
+                            new_thickness = total_soil_thickness(row, col);
                             dtm[row, col] += new_thickness - old_thickness;
                             soildepth_m[row, col] = new_thickness;
                             dtmchange[row, col] += new_thickness - old_thickness;
@@ -12104,7 +12126,19 @@ namespace LORICA4
                     } // end col
                    }); // end row Parallel.For
                 //} //end row
-                if (timeseries.total_average_soilthickness_checkbox.Checked) { total_average_soilthickness_m /= number_of_data_cells; }
+
+                for (int row = 0; row < nr; row++) //accumulate results after Parallel loops
+                {
+                    total_average_soilthickness_m += total_average_soilthickness_m_array[row];
+                    number_soil_thicker_than += number_soil_thicker_than_array[row];
+                    number_soil_coarser_than += number_soil_coarser_than_array[row];
+                    local_soil_depth_m = local_soil_depth_m_array[row]; 
+                    local_soil_mass_kg += local_soil_mass_kg_array[row]; //not even used?
+                }
+
+                if (timeseries.total_average_soilthickness_checkbox.Checked) { total_average_soilthickness_m /= number_of_data_cells; } //safe from race conditon
+
+                
             }
             catch
             {
@@ -12672,6 +12706,23 @@ namespace LORICA4
             return (ndn);
         }
 #region Parallel code examples
+        
+        
+        void bad_optimization_example_1()
+        {
+            for (int row = 0; row < nr; row++) //<-- loop counters can't be global variable or it will cause race condition
+            { //normally loops counters should not be global variables in the first place (probably slower)
+                for (int col = 0; col < nc; col++) //<-- same issue with 'col' being global variable
+                {
+                    for (int layer = 0; layer < max_soil_layers; layer++)
+                    {
+                        if(TextBox.Text)
+                    }
+                }
+            }
+        }
+        
+        
         void bad_parallel_example_1() //commonly seen 3 for-loops
         {
             int layer;
