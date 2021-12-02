@@ -12629,15 +12629,25 @@ namespace LORICA4
         {
             soilPhysicalWeatheringCounter++;
             double old_mass = total_catchment_mass();
-            int cells = nr * nc;
-            int layer, tex_class;
-            double depth;
+            //int cells = nr * nc;
+            //int layer, tex_class;
+            //double depth;
             try
             {
-            //////////////////////////////////////////////////////another parallelization opportunity//////////////////////////////////////////////////////////////////
-                for (row = 0; row < nr; row++)
+                //////////////////////////////////////////////////////another parallelization opportunity//////////////////////////////////////////////////////////////////
+                var options = new ParallelOptions()
                 {
-                    for (col = 0; col < nc; col++)
+                    MaxDegreeOfParallelism = 6
+                };
+
+                //for (int row = 0; row < nr; row++)
+                //{
+                //another parallelization opportunity
+                Parallel.For(0, nr, options, row =>
+                {
+                    int layer, tex_class;
+                    double depth;
+                    for (int col = 0; col < nc; col++)
                     {
                         int tempcol = col;
                         depth = 0;
@@ -12675,7 +12685,7 @@ namespace LORICA4
                             }
                         }
                     }  //);
-                } // end for cells
+                }); // end for cells
                   //timeseries
                 if (timeseries.timeseries_cell_waterflow_check.Checked)
                 {
@@ -12697,14 +12707,24 @@ namespace LORICA4
             // Nothing else weathers. 
             // Not all of the coarse material weathers into silt, a certain fraction is lost to dissolution (90%).
 
-            int cells = nr * nc;
-            int layer, tex_class;
-            double depth;
+            //int cells = nr * nc;
+            //int layer, tex_class;
+            //double depth;
             try
             {
-                for (row = 0; row < nr; row++)
+                var options = new ParallelOptions()
                 {
-                    for (col = 0; col < nc; col++)
+                    MaxDegreeOfParallelism = 6
+                };
+
+                //for (int row = 0; row < nr; row++)
+                //{
+                //another parallelization opportunity
+                Parallel.For(0, nr, options, row =>
+                {
+                    int layer, tex_class;
+                    double depth;
+                    for (int col = 0; col < nc; col++)
 
                     //Parallel.For(0, nc-1, col =>      //////we should paralellize over cols. Problem so far seems to be that the nc-1 or layer limit is exceeded//////////
                     {
@@ -12729,7 +12749,7 @@ namespace LORICA4
                             }
                         }
                     }  //);
-                }
+                });
             }
             catch { Debug.WriteLine(" Soil physical weathering calculation threw an exception"); }
 
@@ -12759,14 +12779,24 @@ namespace LORICA4
         void soil_chemical_weathering() 
 
         {
-            int cells = nr * nc;
-            int layer, tex_class;
-            double depth, weathered_mass_kg, total_weath_mass, fraction_neoform;
+            //int cells = nr * nc;
+            //int layer, tex_class;
+            //double depth, weathered_mass_kg, total_weath_mass, fraction_neoform;
             total_chem_weathered_mass_kg = 0;
             total_fine_neoformed_mass_kg = 0;
-            for (row = 0; row < nr; row++)
+            var options = new ParallelOptions()
             {
-                for (col = 0; col < nc; col++)
+                MaxDegreeOfParallelism = 6
+            };
+
+            //for (int row = 0; row < nr; row++)
+            //{
+            //another parallelization opportunity
+            Parallel.For(0, nr, options, row =>
+            {
+                int layer, tex_class;
+                double depth, weathered_mass_kg, total_weath_mass, fraction_neoform;
+                for (int col = 0; col < nc; col++)
                 {
                     //Main assumption: soils affect each other only through their surface interactions and not e.g. through throughflow
                     depth = 0; total_weath_mass = 0;
@@ -12848,7 +12878,7 @@ namespace LORICA4
                         }
                     }
                 }
-            }  //);
+            });  //);
                //timeseries
             if (timeseries.total_chem_weath_checkbox.Checked)
             {
