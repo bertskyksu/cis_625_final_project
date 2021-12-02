@@ -6616,7 +6616,6 @@ namespace LORICA4
                 {
                     for (int col = 0; col < nc; col++)
                     {
-                        
                         for (int layer = 0; layer < max_soil_layers; layer++) // only the top layer
                         {
 
