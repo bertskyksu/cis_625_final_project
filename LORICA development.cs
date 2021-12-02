@@ -12084,11 +12084,11 @@ namespace LORICA4
                                 Debug.WriteLine("err_uscl20");
 
                             }
-                            if (timeseries.timeseries_number_soil_thicker_checkbox.Checked && System.Convert.ToDouble(timeseries.timeseries_soil_thicker_textbox.Text) < depth_m) { number_soil_thicker_than++; }
-                            if (timeseries.total_average_soilthickness_checkbox.Checked) { total_average_soilthickness_m += depth_m; }
+                            if (timeseries.timeseries_number_soil_thicker_checkbox.Checked && System.Convert.ToDouble(timeseries.timeseries_soil_thicker_textbox.Text) < depth_m) { number_soil_thicker_than++; } //race condition
+                            if (timeseries.total_average_soilthickness_checkbox.Checked) { total_average_soilthickness_m += depth_m; } //race condition
                             if (timeseries.timeseries_soil_depth_checkbox.Checked && System.Convert.ToInt32(timeseries.timeseries_soil_cell_row.Text) == row && System.Convert.ToInt32(timeseries.timeseries_soil_cell_col.Text) == col)
                             {
-                                local_soil_depth_m = depth_m;
+                                local_soil_depth_m = depth_m; //race condition ???
                             }
 
                             //Debug.WriteLine("suscl0" + row + ", " + col + ", " + t + " " + total_soil_mass(row, col));
@@ -12671,6 +12671,88 @@ namespace LORICA4
             }
             return (ndn);
         }
+#region Parallel code examples
+        void bad_parallel_example_1() //commonly seen 3 for-loops
+        {
+            int layer;
+            for (row = 0; row < nr; row++) //<-- loop counters can't be global variable or it will cause race condition
+            { //normally loops counters should not be global variables in the first place (probably slower)
+                for (col = 0; col < nc; col++) //<-- same issue with 'col' being global variable
+                { 
+                    for (layer = 0; layer < max_soil_layers; layer++)
+                    {
+                    }
+                }
+            }
+        }
+
+        void bad_parallel_example_2() //row and col are fixed but...
+        {
+            int layer; // <--- issue here. Each thread will share this intance of 'layer' 
+            //as the loops progress 'layer' will be overwritten and corrupting the value
+            //any variables that are changed in the for-loop need to be inside of the Parallel.For
+            //to accomodate for this change depends on the purpose of the variable but there are some tricks
+            var options = new ParallelOptions() { MaxDegreeOfParallelism = 6 };
+            Parallel.For(0, nr, options, row =>
+            {
+                for (int col = 0; col < nc; col++)
+                {
+                    for (layer = 0; layer < max_soil_layers; layer++)
+                    {
+                    }
+                }
+            });
+        }
+
+        void better_parallel_example_2() //for-loops are all fixed now
+        {
+            var options = new ParallelOptions() { MaxDegreeOfParallelism = 6 };
+            Parallel.For(0, nr, options, row =>
+            {
+                for (int col = 0; col < nc; col++)
+                {
+                    //now each thread will have its own instance of 'layer' that other threads can not access
+                    for (int layer = 0; layer < max_soil_layers; layer++)
+                    {
+                    }
+                }
+            });
+        }
+
+        void bad_parallel_example_3()
+        {
+            var options = new ParallelOptions() { MaxDegreeOfParallelism = 6 };
+            Parallel.For(0, nr, options, row =>
+            {
+                for (int col = 0; col < nc; col++)
+                {
+                    for (int layer = 0; layer < max_soil_layers; layer++)
+                    {   //unless this variable only had a temporary use inside the loops...(should be local var instead)
+                        //it would be a race condition since each thread is accessing same memory location
+                        total_phys_weathered_mass_kg += weathered_mass_kg;
+                    }
+                }
+            });
+        }
+
+        void good_parallel_example_3() 
+        {
+            var options = new ParallelOptions() { MaxDegreeOfParallelism = 6 };
+            Parallel.For(0, nr, options, row =>
+            {
+                for (int col = 0; col < nc; col++)
+                {
+                    for (int layer = 0; layer < max_soil_layers; layer++)
+                    {   //this is ok since 'row' index is a unique memory location that 2 threads will not conflict on
+                        texture_kg[row, col, 0, 1] += 0.063 * dx * dx;
+                    }
+                }
+            });
+        }
+
+
+
+        #endregion
 
         void soil_physical_weathering()  //calculate physical weathering
         {
@@ -12786,9 +12868,9 @@ namespace LORICA4
             //tricks the deposition process by playing with tillage fields. Tillage shoudl be ON - but with zero par values.
             try
             {
-                for (row = 0; row < nr; row++)
+                for (int row = 0; row < nr; row++)
                 {
-                    for (col = 0; col < nc; col++)
+                    for (int col = 0; col < nc; col++)
                     {
                         if (tillfields[row, col] == 1)
                         {
