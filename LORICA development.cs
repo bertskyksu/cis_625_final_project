@@ -11908,6 +11908,7 @@ namespace LORICA4
             //displaysoil(0,0);
             double mass_before = total_catchment_mass();
 
+            //potential race condition variables (update at the end)
             total_average_soilthickness_m = 0; //race condition 1
             number_soil_thicker_than = 0; //race condition 2
             number_soil_coarser_than = 0; //race condition 3
@@ -12132,7 +12133,7 @@ namespace LORICA4
                     total_average_soilthickness_m += total_average_soilthickness_m_array[row];
                     number_soil_thicker_than += number_soil_thicker_than_array[row];
                     number_soil_coarser_than += number_soil_coarser_than_array[row];
-                    local_soil_depth_m = local_soil_depth_m_array[row]; 
+                    local_soil_depth_m = local_soil_depth_m_array[row]; //last element?
                     local_soil_mass_kg += local_soil_mass_kg_array[row]; //not even used?
                 }
 
