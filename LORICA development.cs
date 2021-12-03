@@ -16408,9 +16408,9 @@ namespace LORICA4
                             slope;
 
                 nb_ok = 0; nb_check = 0;
-                for (int row = 0; row < nr; row++)
+                for (row = 0; row < nr; row++)
                 {
-                    for (int col = 0; col < nc; col++)
+                    for (col = 0; col < nc; col++)
                     {
                         till_result[row, col] = 0;
                         // if (dtm[row, col] < -9900 && dtm[row, col] != -9999) { Debug.WriteLine(" Cell " + row + " " + col + " has altitude " + dtm[row, col] + " till " + till_result[row, col]); }
