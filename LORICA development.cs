@@ -11933,14 +11933,20 @@ namespace LORICA4
                 {
                     MaxDegreeOfParallelism = 6
                 };
-
-                double total_average_soilthickness_m_check = System.Convert.ToDouble(timeseries.timeseries_soil_thicker_textbox.Text);
+                //double total_average_soilthickness_m_check = System.Convert.ToDouble(timeseries.timeseries_soil_thicker_textbox.Text); //this fails if "" empty string
+                double total_average_soilthickness_m_check = 0;
+                Double.TryParse(timeseries.timeseries_soil_thicker_textbox.Text, out total_average_soilthickness_m_check);
+                System.Convert.ToDouble(timeseries.timeseries_soil_thicker_textbox.Text);
                 //bool number_soil_thicker_than_check = timeseries.total_average_soilthickness_checkbox.Checked;
-                int local_soil_depth_m_row_check = System.Convert.ToInt32(timeseries.timeseries_soil_cell_row.Text);
-                int local_soil_depth_m_col_check = System.Convert.ToInt32(timeseries.timeseries_soil_cell_col.Text);
+                // int local_soil_depth_m_row_check = System.Convert.ToInt32(timeseries.timeseries_soil_cell_row.Text);
+                //int local_soil_depth_m_col_check = System.Convert.ToInt32(timeseries.timeseries_soil_cell_col.Text);
+                int local_soil_depth_m_row_check;
+                int local_soil_depth_m_col_check;
+                int.TryParse(timeseries.timeseries_soil_cell_row.Text, out local_soil_depth_m_row_check);
+                int.TryParse(timeseries.timeseries_soil_cell_col.Text, out local_soil_depth_m_col_check);
 
 
-               //displaysoil(0, 0);
+                //displaysoil(0, 0);
                 depth_m = 0;
                 Parallel.For(0, nr, options, row =>
                  {
