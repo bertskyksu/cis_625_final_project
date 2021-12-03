@@ -6402,7 +6402,7 @@ namespace LORICA4
 
         void out_double(string name4, double[,] output)
         {
-            int nn, row, col;
+            int nn; //row, col;
             string FILENAME = name4;
             using (StreamWriter sw = new StreamWriter(FILENAME))
             {
@@ -6415,9 +6415,9 @@ namespace LORICA4
                     sw.Write(inputheader[nn]); sw.Write("\r\n");
                     //MessageBox.Show(inputheader[nn]);
                 }
-                for (row = 0; row < nr; row++)
+                for (int row = 0; row < nr; row++)
                 {
-                    for (col = 0; col < nc; col++)
+                    for (int col = 0; col < nc; col++)
                     {
                         sw.Write("{0:F6}", output[row, col]);
                         sw.Write(" ");
@@ -6432,15 +6432,15 @@ namespace LORICA4
 
         void out_mf(string name4, double[,,] output)
         {
-            int nn, row, col;
+            int nn; //row, col
             string FILENAME = name4;
             using (StreamWriter sw = new StreamWriter(FILENAME))
             {
                 sw.Write("In n1 n2 n3 n4 n5 n6 n7 n8");
                 sw.Write("\r\n");
-                for (row = 0; row < nr; row++)
+                for (int row = 0; row < nr; row++)
                 {
-                    for (col = 0; col < nc; col++)
+                    for (int col = 0; col < nc; col++)
                     {
                         for (int dir = 0; dir < 9; dir++)
                         {
@@ -6462,7 +6462,7 @@ namespace LORICA4
 
         void out_integer(string name4, int[,] output)
         {
-            int nn, row, col;
+            int nn;//, row, col;
             string FILENAME = name4;
             using (StreamWriter sw = new StreamWriter(FILENAME))
             {
@@ -6470,9 +6470,9 @@ namespace LORICA4
                 {
                     sw.Write(inputheader[nn]); sw.Write("\n");
                 }
-                for (row = 0; row < nr; row++)
+                for (int row = 0; row < nr; row++)
                 {
-                    for (col = 0; col < nc; col++)
+                    for (int col = 0; col < nc; col++)
                     {
 
                         sw.Write(output[row, col]);
@@ -6488,7 +6488,7 @@ namespace LORICA4
         void out_profile(string name5, double[,] output, bool row_is_fixed, int row_or_col)
         {
             // WVG 20-10-2010 output a profile file for benefit glorious model of LORICA
-            int row, col;
+             
             string FILENAME = name5;
             using (StreamWriter sw = new StreamWriter(FILENAME))
 
@@ -6498,7 +6498,7 @@ namespace LORICA4
                     {
                         try
                         {
-                            for (col = 0; col < nc; col++)// WVG the number of columns is equal to nc
+                            for (int col = 0; col < nc; col++)// WVG the number of columns is equal to nc
                             {
                                 sw.Write(output[row_or_col, col]);
                                 sw.Write(" ");
@@ -6511,7 +6511,7 @@ namespace LORICA4
                     {
                         try
                         {
-                            for (row = 0; row < nr; row++)// WVG the number of columns is equal to nc
+                            for (int row = 0; row < nr; row++)// WVG the number of columns is equal to nc
                             {
                                 sw.Write(output[row, row_or_col]);
                                 sw.Write(" ");
@@ -6770,7 +6770,7 @@ namespace LORICA4
 
         void write_full_output(string filecore, int rows, int cols, int layers, int t)
         {
-            int layer, row, col;
+            int layer;//, row, col;
             string filename = workdir + "\\" + filecore + t + ".lrc";
             //Debug.WriteLine("attempting to write output " + filename + " at t " + t);
             using (StreamWriter sw = new StreamWriter(filename))
@@ -6790,9 +6790,9 @@ namespace LORICA4
                 catch { Debug.WriteLine(" issue with writing the header of the full output file for this timestep"); }
                 try
                 {
-                    for (row = 0; row < rows; row++)
+                    for (int row = 0; row < rows; row++)
                     {
-                        for (col = 0; col < cols; col++)
+                        for (int col = 0; col < cols; col++)
                         {
                             for (layer = 0; layer < layers; layer++)
                             {
@@ -7790,9 +7790,9 @@ namespace LORICA4
             Debug.WriteLine("read sum_dz_soil");
             // SOIL INFORMATION
             // reset old info
-            for (row = 0; row < nr; row++)
+            for (int row = 0; row < nr; row++)
             {
-                for (col = 0; col < nc; col++)
+                for (int col = 0; col < nc; col++)
                 {
                     for (int lay = 0; lay < max_soil_layers; lay++)
                     {
@@ -7851,11 +7851,11 @@ namespace LORICA4
             int[] intoutlet = new int[9];
             int x;
             numsinks = 0;
-            int row, col;
+             
 
-            for (row = 0; row < nr; row++)
+            for (int row = 0; row < nr; row++)
             {        //visit all cells in the DEM and  ...
-                for (col = 0; col < nc; col++)
+                for (int col = 0; col < nc; col++)
                 {
                     if (dtm[row, col] != -9999)
                     {
@@ -7894,11 +7894,11 @@ namespace LORICA4
             last but not least we give status_map a 3 for all cells on the edge of the DEM, so we can end formation of depressions there
             */
 
-            for (col = 0; col < nc; col++)
+            for (int col = 0; col < nc; col++)
             {
                 status_map[0, col] = 3; status_map[nr - 1, col] = 3;
             }
-            for (row = 0; row < nr; row++)
+            for (int row = 0; row < nr; row++)
             {
                 status_map[row, 0] = 3; status_map[row, nc - 1] = 3;
             }
@@ -7923,9 +7923,9 @@ namespace LORICA4
         {
             int z;
             this.InfoStatusPanel.Text = "searchdepressions has been entered";
-            for (row = 0; row < nr; row++)
+            for (int row = 0; row < nr; row++)
             {        //visit all cells in the DEM and  ...
-                for (col = 0; col < nc; col++)
+                for (int col = 0; col < nc; col++)
                 {
                     depression[row, col] = 0;     // set depression to zero
                 }
@@ -7954,9 +7954,9 @@ namespace LORICA4
 
             totaldepressions = 0; totaldepressionsize = 0; maxsize = 0; totaldepressionvolume = 0; largestdepression = -1;
             depressionnumber = 0;
-            for (row = 0; row < nr; row++)
+            for (int row = 0; row < nr; row++)
             {        //visit all cells in the DEM and  ...
-                for (col = 0; col < nc; col++)
+                for (int col = 0; col < nc; col++)
                 {
                     if (status_map[row, col] == 1 && depression[row, col] == 0)
                     {   // sink  -NODATA cells are never sinks, no need to exclude them explicitly here
@@ -8330,9 +8330,9 @@ namespace LORICA4
 
             once_dtm_fill = 0;
 
-            for (row = 0; row < nr; row++)
+            for (int row = 0; row < nr; row++)
             {
-                for (col = 0; col < nc; col++)
+                for (int col = 0; col < nc; col++)
                 {
                     dtmfill_A[row, col] = -1;
                 } //for
@@ -9275,9 +9275,9 @@ namespace LORICA4
             double sum_squared_difference = 0; int num_nbs = 0;
             try
             {
-                for (row = 0; row < nr; row++)
+                for (int row = 0; row < nr; row++)
                 {
-                    for (col = 0; col < nc; col++)
+                    for (int col = 0; col < nc; col++)
                     {
                         if (dtm[row, col] != -9999)
                         {
@@ -9315,9 +9315,9 @@ namespace LORICA4
 
             //then calculate local properties of the landscape around ledges. We expect that ledge positions may be up to 1 cell wrong.
             double maxcliffheight = 0;
-            for (row = 0; row < nr; row++)
+            for (int row = 0; row < nr; row++)
             {
-                for (col = 0; col < nc; col++)
+                for (int col = 0; col < nc; col++)
                 {
                     ledges[row, col] = -9999;
                     nedges[row, col] = -9999;
@@ -9376,9 +9376,9 @@ namespace LORICA4
             }
             Debug.WriteLine("ledgeheights determined");
 
-            for (row = 0; row < nr; row++)
+            for (int row = 0; row < nr; row++)
             {
-                for (col = 0; col < nc; col++)
+                for (int col = 0; col < nc; col++)
                 {
                     if (dtm[row, col] != -9999)
                     {
@@ -9508,9 +9508,9 @@ namespace LORICA4
             Debug.WriteLine("upslope variables calculated");
 
             //finally, add up ledges and hedges to get nedges
-            for (row = 0; row < nr; row++)
+            for (int row = 0; row < nr; row++)
             {
-                for (col = 0; col < nc; col++)
+                for (int col = 0; col < nc; col++)
                 {
                     if (dtm[row, col] != -9999)
                     {
@@ -9604,9 +9604,9 @@ namespace LORICA4
                     waterflow_m3 = new double[nr, nc];
                     vegetation_type = new int[nr, nc];
 
-                    for (row = 0; row < nr; row++)
+                    for (int row = 0; row < nr; row++)
                     {
-                        for (col = 0; col < nc; col++)
+                        for (int col = 0; col < nc; col++)
                         {
                             veg_correction_factor[row, col] = 1;
                             vegetation_type[row, col] = 0;
@@ -9703,9 +9703,9 @@ namespace LORICA4
             try
             {
                 // Debug.WriteLine(" assigning starting values for geomorph  ");
-                for (row = 0; row < nr; row++)
+                for (int row = 0; row < nr; row++)
                 {
-                    for (col = 0; col < nc; col++)
+                    for (int col = 0; col < nc; col++)
                     {
                         dz_soil[row, col] = 0;
                         if (Creep_Checkbox.Checked) { sum_creep_grid[row, col] = 0; creep[row, col] = 0; }
@@ -9838,9 +9838,9 @@ namespace LORICA4
                     {
                         searchdepressions();
                         //define_fillheight_new();
-                        for (row = 0; row < nr; row++)
+                        for (int row = 0; row < nr; row++)
                         {
-                            for (col = 0; col < nc; col++)
+                            for (int col = 0; col < nc; col++)
                             {
                                 if (dtm[row, col] < dtmfill_A[row, col] && dtm[row, col] != -9999) { dtm[row, col] = dtmfill_A[row, col]; }
                             }
@@ -9944,9 +9944,9 @@ namespace LORICA4
             double clayfrac = Convert.ToDouble(soildata.claybox.Text) / 100;
             double fclayfrac = Convert.ToDouble(soildata.fineclaybox.Text) / 100;
             double location_bd;
-            for (row = 0; row < nr; row++)
+            for (int row = 0; row < nr; row++)
             {
-                for (col = 0; col < nc; col++)
+                for (int col = 0; col < nc; col++)
                 {
                     depth_m = 0;
                     if (creep_testing.Checked)
@@ -10107,9 +10107,9 @@ namespace LORICA4
             double fclayfrac = Convert.ToDouble(soildata.fineclaybox.Text) / 100;
             double location_bd;
             double dz_standard = 0.1;
-            for (row = 0; row < nr; row++)
+            for (int row = 0; row < nr; row++)
             {
-                for (col = 0; col < nc; col++)
+                for (int col = 0; col < nc; col++)
                 {
                     depth_m = 0;
                     if (creep_testing.Checked)
@@ -10206,9 +10206,9 @@ namespace LORICA4
         {
             if (check_time_till_fields.Checked && check_space_till_fields.Checked == false)
             {
-                for (row = 0; row < nr; row++)
+                for (int row = 0; row < nr; row++)
                 {
-                    for (col = 0; col < nc; col++)
+                    for (int col = 0; col < nc; col++)
                     {
                         tillfields[row, col] = 1 * till_record[t];
                     }
@@ -10220,9 +10220,9 @@ namespace LORICA4
         void initialise_every()                         //fills the inputgrids with values
         {
             int corrected_t;
-            for (row = 0; row < nr; row++)
+            for (int row = 0; row < nr; row++)
             {
-                for (col = 0; col < nc; col++)
+                for (int col = 0; col < nc; col++)
                 {
                     // time runs from 1 to end_time - compensate for that when taking values from records
                     // also compensate for records shorter than end_time
@@ -10287,9 +10287,9 @@ namespace LORICA4
                 {
                     searchdepressions();
                     //define_fillheight_new();
-                    for (row = 0; row < nr; row++)
+                    for (int row = 0; row < nr; row++)
                     {
-                        for (col = 0; col < nc; col++)
+                        for (int col = 0; col < nc; col++)
                         {
                             if (dtm[row, col] < dtmfill_A[row, col] && dtm[row, col] != -9999) { dtm[row, col] = dtmfill_A[row, col]; }
                         }
@@ -10517,9 +10517,9 @@ namespace LORICA4
             // yearly update infiltration
 
             bool Ineg = false;
-            for (row = 0; row < nr; row++)
+            for (int row = 0; row < nr; row++)
             {
-                for (col = 0; col < nc; col++)
+                for (int col = 0; col < nc; col++)
                 {
                     if (Iy[row, col] < 0)
                     {
@@ -10587,9 +10587,9 @@ namespace LORICA4
         {
             double ET_out = 0;
             double count = 0;
-            for (row = 0; row < nr; row++)
+            for (int row = 0; row < nr; row++)
             {
-                for (col = 0; col < nc; col++)
+                for (int col = 0; col < nc; col++)
                 {
                     ET_out += ET0y[row, col];
                     count += 1;
@@ -11363,9 +11363,9 @@ namespace LORICA4
             {
                 //Debug.WriteLine("suscl2");
                 //displaysoil(0, 0);
-                for (row = 0; row < nr; row++)
+                for (int row = 0; row < nr; row++)
                 {
-                    for (col = 0; col < nc; col++)
+                    for (int col = 0; col < nc; col++)
                     {
                         if (dtm[row, col] != -9999)
                         {
@@ -11397,9 +11397,9 @@ namespace LORICA4
 
 
                 //displaysoil(0, 0);
-                for (row = 0; row < nr; row++)
+                for (int row = 0; row < nr; row++)
                 {
-                    for (col = 0; col < nc; col++)
+                    for (int col = 0; col < nc; col++)
                     {
                         if (dtm[row, col] != -9999)
                         {
@@ -11632,9 +11632,9 @@ namespace LORICA4
             {
                 //Debug.WriteLine("suscl2");
                 //displaysoil(0, 0);
-                for (row = 0; row < nr; row++)
+                for (int row = 0; row < nr; row++)
                 {
-                    for (col = 0; col < nc; col++)
+                    for (int col = 0; col < nc; col++)
                     {
                         if (dtm[row, col] != -9999)
                         {
@@ -11672,9 +11672,9 @@ namespace LORICA4
 
 
                 //displaysoil(0, 0);
-                for (row = 0; row < nr; row++)
+                for (int row = 0; row < nr; row++)
                 {
-                    for (col = 0; col < nc; col++)
+                    for (int col = 0; col < nc; col++)
                     {
                         if (dtm[row, col] != -9999)
                         {
@@ -12815,9 +12815,9 @@ namespace LORICA4
             try
             {
             //another parallelization opportunity
-                for (row = 0; row < nr; row++)
+                for (int row = 0; row < nr; row++)
                 {
-                    for (col = 0; col < nc; col++)
+                    for (int col = 0; col < nc; col++)
                     {
                         int tempcol = col;
                         depth = 0;
@@ -12882,9 +12882,9 @@ namespace LORICA4
             double depth;
             try
             {
-                for (row = 0; row < nr; row++)
+                for (int row = 0; row < nr; row++)
                 {
-                    for (col = 0; col < nc; col++)
+                    for (int col = 0; col < nc; col++)
 
                     //Parallel.For(0, nc-1, col =>                    //we should paralellize over cols. Problem so far seems to be that the nc-1 or layer limit is exceeded
                     {
@@ -12944,9 +12944,9 @@ namespace LORICA4
             double depth, weathered_mass_kg, total_weath_mass, fraction_neoform;
             total_chem_weathered_mass_kg = 0;
             total_fine_neoformed_mass_kg = 0;
-            for (row = 0; row < nr; row++)
+            for (int row = 0; row < nr; row++)
             {
-                for (col = 0; col < nc; col++)
+                for (int col = 0; col < nc; col++)
                 {
                     //Main assumption: soils affect each other only through their surface interactions and not e.g. through throughflow
                     depth = 0; total_weath_mass = 0;
@@ -13074,9 +13074,9 @@ namespace LORICA4
                 double total_young_som_kg = 0, total_old_som_kg = 0;
 
                 ///////////////////////////////////////another parallelization opportunity////////////////////////////////////////
-                for (row = 0; row < nr; row++)
+                for (int row = 0; row < nr; row++)
                 {
-                    for (col = 0; col < nc; col++)
+                    for (int col = 0; col < nc; col++)
                     {
                         if (t == 7 && row == 192 && col == 59) { diagnostic_mode = 1; }
                         else { diagnostic_mode = 0; }
@@ -14044,9 +14044,9 @@ namespace LORICA4
                 calculate_TPI(7);
                 double a = -0.33;
                 double b = 28.33;
-                for (row = 0; row < nr; row++)
+                for (int row = 0; row < nr; row++)
                 {
-                    for (col = 0; col < nc; col++)
+                    for (int col = 0; col < nc; col++)
                     {
                         //calculating hornbeam fraction
                         hornbeam_cover_fraction[row, col] = 1 - Math.Exp(a + b * tpi[row, col]) / (1 + Math.Exp(a + b * tpi[row, col]));
@@ -14087,9 +14087,9 @@ namespace LORICA4
                     calculate_TPI(7);
                     double a = -0.33;
                     double b = 28.33;
-                    for (row = 0; row < nr; row++)
+                    for (int row = 0; row < nr; row++)
                     {
-                        for (col = 0; col < nc; col++)
+                        for (int col = 0; col < nc; col++)
                         {
                             //calculating hornbeam fraction
                             hornbeam_cover_fraction[row, col] = 1 - Math.Exp(a + b * tpi[row, col]) / (1 + Math.Exp(a + b * tpi[row, col]));
@@ -14104,10 +14104,10 @@ namespace LORICA4
                 {
                     Debug.WriteLine("err_cc1");
                 }
-                for (row = 0; row < nr; row++)
+                for (int row = 0; row < nr; row++)
                 {
                     //Parallel.For(0, nc, i =>                    //we parallelize over cols
-                    for (col = 0; col < nc; col++)
+                    for (int col = 0; col < nc; col++)
                     {
                         if (daily_water.Checked)
                         {
@@ -14193,9 +14193,9 @@ namespace LORICA4
             if (daily_water.Checked)
             {
                 int Icount = 0;
-                for (row = 0; row < nr; row++)
+                for (int row = 0; row < nr; row++)
                 {
-                    for (col = 0; col < nc; col++)
+                    for (int col = 0; col < nc; col++)
                     {
                         if (dtm[row, col] != -9999)
                         {
@@ -14214,9 +14214,9 @@ namespace LORICA4
             total_fine_eluviated_mass_kg = 0;
             try
             {
-                for (row = 0; row < nr; row++)
+                for (int row = 0; row < nr; row++)
                 {
-                    for (col = 0; col < nc; col++)
+                    for (int col = 0; col < nc; col++)
                     {
 
 
@@ -14279,9 +14279,9 @@ namespace LORICA4
 
 
                 double depth, f_clay, f_oc, d_depth, ct_advi, eluviated_kg, CEC_ct, CCEC_ct, wdclay;
-                for (row = 0; row < nr; row++)
+                for (int row = 0; row < nr; row++)
                 {
-                    for (col = 0; col < nc; col++)
+                    for (int col = 0; col < nc; col++)
                     {
                         if (dtm[row, col] != -9999)
                         {
@@ -14389,9 +14389,9 @@ namespace LORICA4
             double eluviated_kg;
             try
             {
-                for (row = 0; row < nr; row++)
+                for (int row = 0; row < nr; row++)
                 {
-                    for (col = 0; col < nc; col++)
+                    for (int col = 0; col < nc; col++)
                     {
                         for (layer = 0; layer < max_soil_layers - 1; layer++)   // we loop through all layers except the lower one - clay translocation there has no lower recipient
                         {
@@ -14426,9 +14426,9 @@ namespace LORICA4
                 double CO3_loss;
                 // Carbonate losses [mol m-2 y-1] = 205.58 * percolation [m] - 12.392
                 // Infiltration / percolation is modeled in m, so adjustments have to be made for cell size. In every step? 
-                for (row = 0; row < nr; row++)
+                for (int row = 0; row < nr; row++)
                 {
-                    for (col = 0; col < nc; col++)
+                    for (int col = 0; col < nc; col++)
                     {
                         if (dtm[row, col] != -9999)
                         {
@@ -14650,9 +14650,9 @@ namespace LORICA4
             double[,] mass_difference_input_output = new double[nr, nc];
 
             // 1: set all water and sediment flow to 0
-            for (row = 0; row < nr; row++)
+            for (int row = 0; row < nr; row++)
             {
-                for (col = 0; col < nc; col++)
+                for (int col = 0; col < nc; col++)
                 {
                     {
                         if (only_waterflow_checkbox.Checked == false)
@@ -15116,9 +15116,9 @@ namespace LORICA4
             total_average_altitude = 0; total_altitude = 0;
             total_rain = 0; total_evap = 0; total_infil = 0; total_outflow = 0;
             wet_cells = 0; eroded_cells = 0; deposited_cells = 0;
-            for (row = 0; row < nr; row++)
+            for (int row = 0; row < nr; row++)
             {
-                for (col = 0; col < nc; col++)
+                for (int col = 0; col < nc; col++)
                 {
                     if (dtm[row, col] != -9999)
                     {
@@ -15236,9 +15236,9 @@ namespace LORICA4
                 }
             }
             if (NA_anywhere_in_soil() == true) { Debug.WriteLine("NA found before row col loop in water erosed"); }
-            for (row = 0; row < nr; row++)
+            for (int row = 0; row < nr; row++)
             {
-                for (col = 0; col < nc; col++)
+                for (int col = 0; col < nc; col++)
                 {
 
                     if (dtm[row, col] != -9999)
@@ -15706,9 +15706,9 @@ namespace LORICA4
             total_average_altitude = 0; total_altitude = 0;
             total_rain = 0; total_evap = 0; total_infil = 0; total_outflow = 0;
             wet_cells = 0; eroded_cells = 0; deposited_cells = 0;
-            for (row = 0; row < nr; row++)
+            for (int row = 0; row < nr; row++)
             {
-                for (col = 0; col < nc; col++)
+                for (int col = 0; col < nc; col++)
                 {
                     if (dtm[row, col] != -9999)
                     {
@@ -15866,9 +15866,9 @@ namespace LORICA4
             // the soil physical / hydrological / slope stability parameters:
             //	 Transmissivity, Bulk Density,              
             //   Combined Cohesion and Internal riction.
-            for (row = 0; row < nr; row++)
+            for (int row = 0; row < nr; row++)
             {
-                for (col = 0; col < nc; col++)
+                for (int col = 0; col < nc; col++)
                 {
                     //currently spatially uniform
                     T_fac[row, col] = System.Convert.ToDouble(textBox_ls_trans.Text);
@@ -15916,9 +15916,9 @@ namespace LORICA4
             //set all start q values effective precipitation at time t
             nb_ok = 0; nb_check = 0; all_grids = 0;
             maximum_allowed_deposition = -9999; dh_tol = 0.00025;
-            for (row = 0; row < nr; row++)
+            for (int row = 0; row < nr; row++)
             {
-                for (col = 0; col < nc; col++)
+                for (int col = 0; col < nc; col++)
                 {
                     camf[row, col] = 1;    // contributing area multiple flow matrix = 1
                     stslope[row, col] = 0;
@@ -16000,9 +16000,9 @@ namespace LORICA4
             }   // end for
 
             // Calculation of steepest descent local slope, 8 cell window
-            for (row = 0; row < nr; row++)
+            for (int row = 0; row < nr; row++)
             {
-                for (col = 0; col < nc; col++)
+                for (int col = 0; col < nc; col++)
                 {
                     direct = 20; dz_max = -1;
                     for (i = (-1); i <= 1; i++)
@@ -16123,9 +16123,9 @@ namespace LORICA4
                 //set all start q values effective precipitation at time t
                 nb_ok = 0; nb_check = 0; all_grids = 0.0;
                 maximum_allowed_deposition = -9999.0; dh_tol = 0.00025; erotot = 0.0;
-                for (row = 0; row < nr; row++)
+                for (int row = 0; row < nr; row++)
                 {
-                    for (col = 0; col < nc; col++)
+                    for (int col = 0; col < nc; col++)
                     {
                         slidemap[row, col] -= 1;  // terug opbouwen van 'landslide potential' bij meerdere tijdstappen
                         if (slidemap[row, col] < 0) { slidemap[row, col] = 0; }
@@ -16210,9 +16210,9 @@ namespace LORICA4
                         //2 Second while loop to process slide deposition with a 'cell distance' and 'double' multiple flow
                 nb_ok = 0; nb_check = 0; all_grids = 0.0; tell = 0;
                 maximum_allowed_deposition = -9999.0; dh_tol = 0.00025; sedtot = 0.0; strsed = 0.0; startsed = 0.0;
-                for (row = 0; row < nr; row++)
+                for (int row = 0; row < nr; row++)
                 {
-                    for (col = 0; col < nc; col++)
+                    for (int col = 0; col < nc; col++)
                     {
                         cel_dist[row, col] = ((0.4 * dh_slid[row, col]) / dx); // FACTOR 2 calculate 'celdistance', empirical fraction of runout set at 0.4 (Lit.)
                         startsed += sed_bud[row, col]; // 'startsed'-counter = only to display initial sediment budget in ero-sed balance in model run
@@ -16329,9 +16329,9 @@ namespace LORICA4
                     }//2 end if sed_bud
                 } //2 end for all cells 2
 
-                for (row = 0; row < nr; row++)
+                for (int row = 0; row < nr; row++)
                 {
-                    for (col = 0; col < nc; col++)
+                    for (int col = 0; col < nc; col++)
                     {
                         if (ero_slid[row, col] < 0.0)
                         {
@@ -16354,14 +16354,14 @@ namespace LORICA4
             {
                 double mass_before = total_catchment_mass();
                 this.InfoStatusPanel.Text = "tillage calculation";
-                int row, col, i, j;
+                int i, j; //row, col, 
                 double slope_sum, dz_min, d_x, dz_max, dh, fraction, temptill, tempdep, temptill_kg,
                             slope;
 
                 nb_ok = 0; nb_check = 0;
-                for (row = 0; row < nr; row++)
+                for (int row = 0; row < nr; row++)
                 {
-                    for (col = 0; col < nc; col++)
+                    for (int col = 0; col < nc; col++)
                     {
                         till_result[row, col] = 0;
                         // if (dtm[row, col] < -9900 && dtm[row, col] != -9999) { Debug.WriteLine(" Cell " + row + " " + col + " has altitude " + dtm[row, col] + " till " + till_result[row, col]); }
@@ -16621,9 +16621,9 @@ namespace LORICA4
                 }   // end  for 
                     // Debug.WriteLine("till9");
                     // 3. Update elevation changes
-                for (row = 0; row < nr; row++)
+                for (int row = 0; row < nr; row++)
                 {
-                    for (col = 0; col < nc; col++)
+                    for (int col = 0; col < nc; col++)
                     {
                         if (dtm[row, col] != -9999)
                         {
@@ -16673,9 +16673,9 @@ namespace LORICA4
 
             nb_ok = 0; nb_check = 0; all_grids = 0;
             dhmin = -9999; dhe_tol = 0.000001; dhs_tol = 0.000001;
-            for (row = 0; row < nr; row++)
+            for (int row = 0; row < nr; row++)
             {
-                for (col = 0; col < nc; col++)
+                for (int col = 0; col < nc; col++)
                 {
                     creep[row, col] = 0;	// neighbour check is 0 is false
                 }
@@ -16761,9 +16761,9 @@ namespace LORICA4
                     }//end for j
                 }//end for i
             }		// end for sorted 
-            for (row = 0; row < nr; row++)
+            for (int row = 0; row < nr; row++)
             {
-                for (col = 0; col < nc; col++)
+                for (int col = 0; col < nc; col++)
                 {
                     dtmchange[row, col] += (creep[row, col]);
                     sum_creep_grid[row, col] += (creep[row, col]);
@@ -16792,9 +16792,9 @@ namespace LORICA4
 
                 nb_ok = 0; nb_check = 0; all_grids = 0;
                 dhmin = -9999; dhe_tol = 0.000001; dhs_tol = 0.000001;
-                for (row = 0; row < nr; row++)
+                for (int row = 0; row < nr; row++)
                 {
-                    for (col = 0; col < nc; col++)
+                    for (int col = 0; col < nc; col++)
                     {
                         creep[row, col] = 0;    // neighbour check is 0 is false
                     }
@@ -17448,9 +17448,9 @@ namespace LORICA4
                 // int P_fall = Convert.ToInt32(Math.Round(1730 / dx / dx)); // 1/P_fall is the chance of tree fall, per m2, that's why we correct for cell size 
                 // Debug.WriteLine("elevation of row 57 and col 40 at t {0} is {1}", t, dtm[57, 40]);
                 int rowsource = 0, colsource = 0, rowsink = 0, colsink = 0;
-                for (row = 0; row < nr; row++)
+                for (int row = 0; row < nr; row++)
                 {
-                    for (col = 0; col < nc; col++)
+                    for (int col = 0; col < nc; col++)
                     {
                         if (dtm[row, col] != -9999 & aridity_vegetation[row, col] > 1) // if cell exists, and if there is no grass growing
                         {
@@ -17801,9 +17801,9 @@ namespace LORICA4
             if (daily_water.Checked)
             {
                 int Icount = 0;
-                for (row = 0; row < nr; row++)
+                for (int row = 0; row < nr; row++)
                 {
-                    for (col = 0; col < nc; col++)
+                    for (int col = 0; col < nc; col++)
                     {
                         if (dtm[row, col] != -9999)
                         {
@@ -17817,9 +17817,9 @@ namespace LORICA4
                 Iavg /= Icount;
             }
             int soil_layer, lowest_soil_layer;
-            for (row = 0; row < nr; row++)
+            for (int row = 0; row < nr; row++)
             {
-                for (col = 0; col < nc; col++)
+                for (int col = 0; col < nc; col++)
                 {
                     if (dtm[row, col] != -9999)
                     {
@@ -17863,11 +17863,11 @@ namespace LORICA4
         private void calculate_tilting()
         {
             this.InfoStatusPanel.Text = "tilting calculation";
-            int row, col;
+             
 
-            for (row = 0; row < nr; row++)
+            for (int row = 0; row < nr; row++)
             {
-                for (col = 0; col < nc; col++)
+                for (int col = 0; col < nc; col++)
                 {
                     if (tilt_location == 0) { dtm[row, col] += tilt_intensity * (col / nc); }
                     if (tilt_location == 1) { dtm[row, col] += tilt_intensity * (row / nr); }
@@ -17880,11 +17880,11 @@ namespace LORICA4
         private void calculate_uplift()
         {
             this.InfoStatusPanel.Text = "uplift calculation";
-            int row, col;
+             
 
-            for (row = 0; row < nr; row++)
+            for (int row = 0; row < nr; row++)
             {
-                for (col = 0; col < nc; col++)
+                for (int col = 0; col < nc; col++)
                 {
                     if (lift_location == 0 && row > lift_location) { dtm[row, col] += lift_intensity; }
                     if (lift_location == 1 && row > lift_location) { dtm[row, col] += lift_intensity; }
@@ -17902,9 +17902,9 @@ namespace LORICA4
             //while ( dh > 150;dh / (d_x * Math.Sqrt(2)) > 7.5)
             {
                 last_time_activity = false;
-                for (row = 0; row < nr; row++)
+                for (int row = 0; row < nr; row++)
                 {        //visit all cells in the DEM and  ...
-                    for (col = 0; col < nc; col++)
+                    for (int col = 0; col < nc; col++)
                     {
                         for (i = (-1); i <= 1; i++)
                         {   // maakt een rondje om de cel
@@ -18108,9 +18108,9 @@ namespace LORICA4
         void update_slope_and_aspect()
         {
             double slopemax, slope, slopetot;
-            for (row = 0; row < nr; row++)
+            for (int row = 0; row < nr; row++)
             {
-                for (col = 0; col < nc; col++)
+                for (int col = 0; col < nc; col++)
                 {
                     if (dtm[row, col] != -9999)
                     {
@@ -18250,7 +18250,7 @@ namespace LORICA4
         void calc_hillshade() // 
         {
             //Local variables
-            int row, col;
+             
 
             double slopemax;
             double slope;
@@ -18457,7 +18457,7 @@ namespace LORICA4
             objGraphics = Graphics.FromImage(m_objDrawingSurface);
             objGraphics.Clear(SystemColors.Control);
 
-            int row, col, z;
+            int z; //row, col, 
             int redcol = 0, greencol = 0, bluecol = 0, alphacol = 255;
             int t = 0;
 
@@ -18479,9 +18479,9 @@ namespace LORICA4
                 calc_hillshade();       // Call up routine 
 
                 // First, find max, min and range of DEM and Hillshade
-                for (row = 0; row < nr; row++)
+                for (int row = 0; row < nr; row++)
                 {
-                    for (col = 0; col < nc; col++)
+                    for (int col = 0; col < nc; col++)
                     {
                         zCalc = dtm[row, col];
                         if (zCalc != -9999)
@@ -18503,9 +18503,9 @@ namespace LORICA4
 
                 Debug.WriteLine(" zMax, zMin, zRange : " + zMax + " " + zMin + " " + zRange);
 
-                for (row = 0; row < nr - 1; row++)
+                for (int row = 0; row < nr - 1; row++)
                 {
-                    for (col = 0; col < nc - 1; col++)
+                    for (int col = 0; col < nc - 1; col++)
                     {
                         if (dtm[row, col] > 0)
                         {
@@ -18560,9 +18560,9 @@ namespace LORICA4
 
 
             // All these loop through just the 'Active Area'
-            for (row = 0; row < nr - 1; row++)
+            for (int row = 0; row < nr - 1; row++)
             {
-                for (col = 0; col < nc - 1; col++)
+                for (int col = 0; col < nc - 1; col++)
                 {
                     if (1 > 0) // Index masks out so only 'active cells' shown	was if(index[row,col]>-9999)		
                     {
@@ -19562,9 +19562,9 @@ Example: rainfall.asc can look like:
             double total_bulk_density = 0 ;
             double average_bulk_density = 0;
             int objective_function_cells = 0;
-            for (row = 0; row < nr; row++)
+            for (int row = 0; row < nr; row++)
             {
-                for (col = 0; col < nc; col++)
+                for (int col = 0; col < nc; col++)
                 {
                     if (dtm[row, col] != -9999)
                     {
@@ -20143,9 +20143,9 @@ Example: rainfall.asc can look like:
             //height above sealevel itself is not important, just that the landscape grows over time
             //therefore, Marijn's solution: if (elevation < threshold(t)) , then elevation = nodata
             double minimum_overwater_elevation = (10263 - t) / 218;
-            for (row = 0; row < nr; row++)
+            for (int row = 0; row < nr; row++)
             {
-                for (col = 0; col < nc; col++)
+                for (int col = 0; col < nc; col++)
                 {
 
                     if (original_dtm[row, col] != -9999)
@@ -20489,9 +20489,9 @@ Example: rainfall.asc can look like:
                     try
                     {
                         out_integer(workdir + "\\" + run_number + "_" + t_out + "_out_vegetationtype.asc", vegetation_type);
-                        for (row = 0; row < nr; row++)
+                        for (int row = 0; row < nr; row++)
                         {
-                            for (col = 0; col < nc; col++)
+                            for (int col = 0; col < nc; col++)
                             {
                                 vegetation_type[row, col] = 0; // reset vegetation_type, to give the output per output period
                             }
@@ -20956,9 +20956,9 @@ Example: rainfall.asc can look like:
             {
                 //Debug.WriteLine("normal sorting. nr " + nr + " nc " + nc + " t " + t);
                 number_of_data_cells = 0;
-                for (row = 0; row < nr; row++)  // why not do this only in the first timestep? And use the existing one as input in subsequent timesteps?
+                for (int row = 0; row < nr; row++)  // why not do this only in the first timestep? And use the existing one as input in subsequent timesteps?
                 {
-                    for (col = 0; col < nc; col++)
+                    for (int col = 0; col < nc; col++)
                     {
                         if (dtm[row, col] != -9999)
                         {
@@ -21086,9 +21086,9 @@ Example: rainfall.asc can look like:
             if (t == 0)  // only in the first timestep;
             {
                 number_of_data_cells = 0;
-                for (row = 0; row < nr; row++)  
+                for (int row = 0; row < nr; row++)  
                 {
-                    for (col = 0; col < nc; col++)
+                    for (int col = 0; col < nc; col++)
                     {
                         if (dtm[row, col] != -9999)
                         {
