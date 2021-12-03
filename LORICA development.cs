@@ -11934,7 +11934,13 @@ namespace LORICA4
                     MaxDegreeOfParallelism = 6
                 };
 
-                //displaysoil(0, 0);
+                double total_average_soilthickness_m_check = System.Convert.ToDouble(timeseries.timeseries_soil_thicker_textbox.Text);
+                //bool number_soil_thicker_than_check = timeseries.total_average_soilthickness_checkbox.Checked;
+                int local_soil_depth_m_row_check = System.Convert.ToInt32(timeseries.timeseries_soil_cell_row.Text);
+                int local_soil_depth_m_col_check = System.Convert.ToInt32(timeseries.timeseries_soil_cell_col.Text);
+
+
+               //displaysoil(0, 0);
                 depth_m = 0;
                 Parallel.For(0, nr, options, row =>
                  {
@@ -12100,7 +12106,8 @@ namespace LORICA4
                                 Debug.WriteLine("err_uscl20");
 
                             }
-                            if (timeseries.timeseries_number_soil_thicker_checkbox.Checked && System.Convert.ToDouble(timeseries.timeseries_soil_thicker_textbox.Text) < depth_m) 
+                            //textbox.Text is super slow in loop. put in local variable outside of loops (only if values dont change)
+                            if (timeseries.timeseries_number_soil_thicker_checkbox.Checked && total_average_soilthickness_m_check < depth_m) 
                              {
                                  number_soil_coarser_than_array[row]++; //race condition 2
                              } 
@@ -12108,7 +12115,7 @@ namespace LORICA4
                              {
                                  total_average_soilthickness_m_array[row] += depth_m; //race condition 1
                              } 
-                            if (timeseries.timeseries_soil_depth_checkbox.Checked && System.Convert.ToInt32(timeseries.timeseries_soil_cell_row.Text) == row && System.Convert.ToInt32(timeseries.timeseries_soil_cell_col.Text) == col)
+                            if (timeseries.timeseries_soil_depth_checkbox.Checked && local_soil_depth_m_row_check == row && local_soil_depth_m_col_check == col)
                             {
                                  //local_soil_depth_m = depth_m; //race condition 4 (weird since it just gets over 
                                  local_soil_depth_m_array[row] = depth_m;
@@ -15866,6 +15873,41 @@ namespace LORICA4
             // the soil physical / hydrological / slope stability parameters:
             //	 Transmissivity, Bulk Density,              
             //   Combined Cohesion and Internal riction.
+            var options = new ParallelOptions()
+            {
+                MaxDegreeOfParallelism = 6
+            };
+
+            double textBox_ls_trans_value = System.Convert.ToDouble(textBox_ls_trans.Text);
+            double textBox_ls_coh_value = System.Convert.ToDouble(textBox_ls_coh.Text);
+            double textBox_ls_bd_value = System.Convert.ToDouble(textBox_ls_bd.Text);
+            double textBox_ls_ifr_value = System.Convert.ToDouble(textBox_ls_ifr.Text);
+            /*
+            Parallel.For(0, nr, options, row =>
+            {
+                for (int col = 0; col < nc; col++)
+                {
+                    //currently spatially uniform
+                    T_fac[row, col] = textBox_ls_trans_value;
+                    C_fac[row, col] = textBox_ls_coh_value;
+                    bulkd[row, col] = textBox_ls_bd_value;
+                    intfr[row, col] = textBox_ls_ifr_value
+                }
+            });
+            */
+            for (int row = 0; row < nr; row++)
+            {
+                for (int col = 0; col < nc; col++)
+                {
+                    //currently spatially uniform
+                    T_fac[row, col] = textBox_ls_trans_value;
+                    C_fac[row, col] = textBox_ls_coh_value;
+                    bulkd[row, col] = textBox_ls_bd_value;
+                    intfr[row, col] = textBox_ls_ifr_value;
+                }
+            }
+
+            /*
             for (int row = 0; row < nr; row++)
             {
                 for (int col = 0; col < nc; col++)
@@ -15886,25 +15928,26 @@ namespace LORICA4
                     /*if (soilmap[row,col]==1) {  // Lone Kauri 15;0.43;12.223;1.455;0.688
                         T_fac[row,col]=a_T*T_act; C_fac[row,col]=a_coh*C_act;
                         bulkd[row,col]=a_bd*bulkd_act; intfr[row,col]=a_ifr*intfr_act;
-                     }
+                        }
                     if (soilmap[row,col]==2) {  // Piha       18;0.21;5.976;1.447;0.678
                         T_fac[row,col]=b_T*T_act; C_fac[row,col]=b_coh*C_act;
                         bulkd[row,col]=b_bd*bulkd_act; intfr[row,col]=b_ifr*intfr_act;
-                     }
+                        }
                     if (soilmap[row,col]==3) {  // Nihotupu   11;0.25;13.352;1.436;0.548
                         T_fac[row,col]=c_T*T_act; C_fac[row,col]=c_coh*C_act;
                         bulkd[row,col]=c_bd*bulkd_act; intfr[row,col]=c_ifr*intfr_act;
-                     }
-                     if (soilmap[row,col]==4) {  //
+                        }
+                        if (soilmap[row,col]==4) {  //
                         T_fac[row,col]=d_T*T_act; C_fac[row,col]=d_coh*C_act;
                         bulkd[row,col]=d_bd*bulkd_act; intfr[row,col]=d_ifr*intfr_act;
-                     }
-                     if (soilmap[row,col]==5) {  //
+                        }
+                        if (soilmap[row,col]==5) {  //
                         T_fac[row,col]=e_T*T_act; C_fac[row,col]=e_coh*C_act;
                         bulkd[row,col]=e_bd*bulkd_act; intfr[row,col]=e_ifr*intfr_act;
-                     }   */
-                } //for
-            } //for
+                        }   */
+               // } //for
+           // } //for
+            
         }
 
         void calculate_critical_rain()    //Calculates Critical Steady State Rainfall for Landsliding    
