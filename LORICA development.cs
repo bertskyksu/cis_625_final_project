@@ -12822,54 +12822,74 @@ namespace LORICA4
         void soil_physical_weathering()  //calculate physical weathering
         {
             double old_mass = total_catchment_mass();
-            int cells = nr * nc;
-            int layer, tex_class;
-            double depth;
+            //int cells = nr * nc;
+            //int layer, tex_class;
+            //double depth;
+            double physical_weathering_constant_local = physical_weathering_constant;
+            double Cone_local = Cone;
+            double Ctwo_local = Ctwo;
+            double dt_local = dt;
+
+            double[] total_phys_weathered_mass_kg_temp = new double[nr];
+
+            //why does total_phys_weathered_mass_kg not reset (= 0) like in soil_chemical_weathering ???
             try
             {
-            //another parallelization opportunity
-                for (int row = 0; row < nr; row++)
+                //another parallelization opportunity
+                //for (int row = 0; row < nr; row++)
+                //{
+                var options = new ParallelOptions(){ MaxDegreeOfParallelism = 6};
+
+                //for (int row = 0; row < nr; row++)
+                //{
+                
+                Parallel.For(0, nr, options, row =>
                 {
                     for (int col = 0; col < nc; col++)
                     {
                         int tempcol = col;
-                        depth = 0;
-                        for (layer = 0; layer < max_soil_layers; layer++)
+                        double depth = 0;
+                        for (int layer = 0; layer < max_soil_layers; layer++)
                         {
                             if (layerthickness_m[row, tempcol, layer] > 0)
                             {
                                 int templayer = layer;
                                 depth += layerthickness_m[row, tempcol, templayer] / 2;
-                                for (tex_class = 0; tex_class <= 2; tex_class++)   //we only physically weather the coarse, sand and silt fractions.
+                                for (int tex_class = 0; tex_class <= 2; tex_class++)   //we only physically weather the coarse, sand and silt fractions.
                                 {
                                     int tempclass = tex_class;
                                     // calculate the mass involved in physical weathering
-                                    weathered_mass_kg = texture_kg[row, tempcol, templayer, tempclass] * physical_weathering_constant * Math.Exp(-Cone * depth) * -Ctwo / Math.Log10(upper_particle_size[tempclass]) * dt;
-                                    total_phys_weathered_mass_kg += weathered_mass_kg;
+                                    //weathered_mass_kg = texture_kg[row, tempcol, templayer, tempclass] * physical_weathering_constant_local * Math.Exp(-Cone_local * depth) * -Ctwo_local / Math.Log10(upper_particle_size[tempclass]) * dt_local;
+                                    double weathered_mass_kg_local = texture_kg[row, tempcol, templayer, tempclass] * physical_weathering_constant_local * Math.Exp(-Cone_local * depth) * -Ctwo_local / Math.Log10(upper_particle_size[tempclass]) * dt_local;
+                                    total_phys_weathered_mass_kg_temp[row] += weathered_mass_kg_local;
                                     //Debug.WriteLine(" weathered mass is " + weathered_mass + " for class " + tempclass );
                                     // calculate the products involved
                                     if (tex_class == 0)
                                     {
-                                        texture_kg[row, tempcol, templayer, tempclass + 1] += 0.975 * weathered_mass_kg;
-                                        texture_kg[row, tempcol, templayer, tempclass + 2] += 0.025 * weathered_mass_kg;
+                                        texture_kg[row, tempcol, templayer, tempclass + 1] += 0.975 * weathered_mass_kg_local;
+                                        texture_kg[row, tempcol, templayer, tempclass + 2] += 0.025 * weathered_mass_kg_local;
                                     }
                                     if (tex_class == 1)
                                     {
-                                        texture_kg[row, tempcol, templayer, tempclass + 1] += 0.96 * weathered_mass_kg;
-                                        texture_kg[row, tempcol, templayer, tempclass + 2] += 0.04 * weathered_mass_kg;
+                                        texture_kg[row, tempcol, templayer, tempclass + 1] += 0.96 * weathered_mass_kg_local;
+                                        texture_kg[row, tempcol, templayer, tempclass + 2] += 0.04 * weathered_mass_kg_local;
                                     }
                                     if (tex_class == 2)
                                     {
-                                        texture_kg[row, tempcol, templayer, tempclass + 1] += weathered_mass_kg;
+                                        texture_kg[row, tempcol, templayer, tempclass + 1] += weathered_mass_kg_local;
                                     }
-                                    texture_kg[row, tempcol, templayer, tempclass] -= weathered_mass_kg;
+                                    texture_kg[row, tempcol, templayer, tempclass] -= weathered_mass_kg_local;
                                 }
                                 depth += layerthickness_m[row, tempcol, templayer] / 2;
                             }
                         }
                     }  //);
-                } // end for cells
-                  //timeseries
+                }); // end for cells
+                for (int row = 0; row < nr; row++) //combine parallel results safely
+                {
+                    total_phys_weathered_mass_kg += total_phys_weathered_mass_kg_temp[row];
+                }
+                   //timeseries
                 if (timeseries.timeseries_cell_waterflow_check.Checked)
                 {
                     timeseries_matrix[t, timeseries_order[15]] = total_phys_weathered_mass_kg;
@@ -12890,7 +12910,7 @@ namespace LORICA4
             // Nothing else weathers. 
             // Not all of the coarse material weathers into silt, a certain fraction is lost to dissolution (90%).
 
-            int cells = nr * nc;
+            int cells = nr * nc; // not used?
             int layer, tex_class;
             double depth;
             try
@@ -12952,32 +12972,47 @@ namespace LORICA4
         void soil_chemical_weathering() 
 
         {
-            int cells = nr * nc;
-            int layer, tex_class;
-            double depth, weathered_mass_kg, total_weath_mass, fraction_neoform;
+            //int cells = nr * nc;
+            //int layer, tex_class;
+            //double depth, weathered_mass_kg, total_weath_mass, fraction_neoform;
             total_chem_weathered_mass_kg = 0;
             total_fine_neoformed_mass_kg = 0;
-            for (int row = 0; row < nr; row++)
+            double chemical_weathering_constant_local = chemical_weathering_constant;
+            double Cthree_local = Cthree;
+            double Cfour_local = Cfour;
+            double dt_local = dt;
+
+            double[] total_chem_weathered_mass_kg_temp = new double[nr]; //temp array for combining at end safetly
+
+            var options = new ParallelOptions() { MaxDegreeOfParallelism = 6 };
+
+            //for (int row = 0; row < nr; row++)
+            //{
+
+            Parallel.For(0, nr, options, row =>
             {
                 for (int col = 0; col < nc; col++)
                 {
                     //Main assumption: soils affect each other only through their surface interactions and not e.g. through throughflow
-                    depth = 0; total_weath_mass = 0;
-                    for (layer = 0; layer < max_soil_layers; layer++)
+                    double depth = 0; double total_weath_mass = 0;
+                    for (int layer = 0; layer < max_soil_layers; layer++)
                     {
                         if (layerthickness_m[row, col, layer] > 0)
                         {
                             depth += layerthickness_m[row, col, layer] / 2;
-                            for (tex_class = 1; tex_class <= 4; tex_class++) // only sand, silt, clay and fine clay are chemically weathered
+                            for (int tex_class = 1; tex_class <= 4; tex_class++) // only sand, silt, clay and fine clay are chemically weathered
                             {
-                                weathered_mass_kg = texture_kg[row, col, layer, tex_class] * chemical_weathering_constant / 10 * Math.Exp(-Cthree * depth) * Cfour * specific_area[tex_class] * dt;
+                                double weathered_mass_kg = texture_kg[row, col, layer, tex_class] * chemical_weathering_constant_local / 10 * Math.Exp(-Cthree_local * depth) * Cfour_local * specific_area[tex_class] * dt_local;
 
                                 if (daily_water.Checked) { weathered_mass_kg *= waterfactor[row, col]; }
 
                                 //Debug.WriteLine(" weath mass for layer " + layer + " class " + tex_class + " is " + weathered_mass_kg + " " + Math.Exp(-Cthree * depth));
                                 // note that the chem_weath constant is in kg/m2 mineral surface / y (in contrast to the original value from Salvador Blanes (mol/m2 mineral/s)
                                 if (weathered_mass_kg > texture_kg[row, col, layer, tex_class]) { weathered_mass_kg = texture_kg[row, col, layer, tex_class]; }
-                                total_chem_weathered_mass_kg += weathered_mass_kg;
+                                
+                                //total_chem_weathered_mass_kg += weathered_mass_kg;
+                                total_chem_weathered_mass_kg_temp[row] += weathered_mass_kg; //combine at end
+
                                 texture_kg[row, col, layer, tex_class] -= weathered_mass_kg;
 
                                 //the following code accounts for the change in average size of the weathered class, 
@@ -13041,8 +13076,13 @@ namespace LORICA4
                         }
                     }
                 }
-            }  //);
+            });
                //timeseries
+
+            for (int row = 0; row < nr; row++) //combine parallel results safely
+            {
+                total_chem_weathered_mass_kg += total_chem_weathered_mass_kg_temp[row];
+            }
             if (timeseries.total_chem_weath_checkbox.Checked)
             {
                 timeseries_matrix[t, timeseries_order[16]] = total_chem_weathered_mass_kg;
