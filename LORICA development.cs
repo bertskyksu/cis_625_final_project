@@ -14925,7 +14925,7 @@ namespace LORICA4
         {
             //in Spitsbergen, it is mostly silt (with attendant clay) that gets translocated in the profile. Clay is not modelled in itself
 
-            int layer;
+            //int layer;
             double eluviated_kg;
             try
             {
@@ -14933,7 +14933,7 @@ namespace LORICA4
                 {
                     for (int col = 0; col < nc; col++)
                     {
-                        for (layer = 0; layer < max_soil_layers - 1; layer++)   // we loop through all layers except the lower one - clay translocation there has no lower recipient
+                        for (int layer = 0; layer < max_soil_layers - 1; layer++)   // we loop through all layers except the lower one - clay translocation there has no lower recipient
                         {
                             if (layerthickness_m[row, col, layer] > 0 && layerthickness_m[row, col, layer + 1] > 0)  // both source and sink layers have to exist.
                             {
