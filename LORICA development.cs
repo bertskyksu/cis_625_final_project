@@ -6557,16 +6557,11 @@ namespace LORICA4
 
         void writeallsoils()
         {
-            
             //double cumthick, midthick, z_layer;
             string FILENAME = string.Format("{0}\\t{1}_out_allsoils.csv", workdir, t + 1);
-            
             int t_out = t + 1;
             string[,,] stringlines = new string[nr, nc, max_soil_layers]; //holds strings to be written to file
-            var options = new ParallelOptions()
-            {
-                MaxDegreeOfParallelism = 6
-            };
+            var options = new ParallelOptions(){ MaxDegreeOfParallelism = 6};
             Parallel.For(0, nr, options, row =>
             {
                 StringBuilder sb = new StringBuilder();
@@ -6585,7 +6580,6 @@ namespace LORICA4
                                 cumthick += layerthickness_m_1;
                                 midthick += layerthickness_m_1 / 2;
 
-
                                 double totalweight_tex = texture_kg[row, col, layer, 0] + texture_kg[row, col, layer, 1] + texture_kg[row, col, layer, 2] + texture_kg[row, col, layer, 3] + texture_kg[row, col, layer, 4];
                                 //double totalweight_tex = texture_kg_0 + texture_kg_1 + texture_kg_2 + texture_kg_3 + texture_kg_4;
                                 //double totalweight = totalweight_tex + young_SOM_kg_1 + old_SOM_kg_1; //declared but never used?
@@ -6595,7 +6589,6 @@ namespace LORICA4
                                 //sb.Append(row).Append(",").Append(col).Append(",").Append(t_out).Append(",").Append(layer).Append(",").Append(cumthick).Append(",").Append(layerthickness_m_1).Append(",").Append(midthick).Append(",").Append(z_layer).Append(",").Append(texture_kg_0).Append(",").Append(texture_kg_1).Append(",").Append(texture_kg_2).Append(",").Append(texture_kg_3).Append(",").Append(texture_kg_4).Append(",").Append(young_SOM_kg_1).Append(",").Append(old_SOM_kg_1).Append(",").Append(young_SOM_kg_1 / old_SOM_kg_1).Append(",").Append(texture_kg_0 / totalweight_tex).Append(",").Append(texture_kg_1 / totalweight_tex).Append(",").Append(texture_kg_2 / totalweight_tex).Append(",").Append(texture_kg_3 / totalweight_tex).Append(",").Append(texture_kg_4 / totalweight_tex).Append(",").Append((texture_kg_3 + texture_kg_4) / totalweight_tex).Append(",").Append((young_SOM_kg_1 + old_SOM_kg_1) / (totalweight)).Append(",").Append(bulkdensity[row, col, layer]);
                                 //sb.setLength(0);
                                 sb.Append("\r\n");
-
 
                                 stringlines[row, col, layer] = sb.ToString();
                                 sb.Clear();
@@ -10175,7 +10168,7 @@ namespace LORICA4
                                 bulkdensity[row, col, soil_layer] = location_bd;
 
                                 if (decalcification_checkbox.Checked)
-                                {
+                                {  //very expensive calculation here
                                     CO3_kg[row, col, soil_layer] = (location_bd * layerthickness_m[row, col, soil_layer] * dx * dx) * Convert.ToDouble(ini_CaCO3_content.Text) * 40.08 / (40.08 + 60.01); // calculate total CO3: total mass * fraction of soil * fraction of CaCO3 molecule
                                 }
 
@@ -11922,11 +11915,7 @@ namespace LORICA4
             {
 
                 //parallel array holders for each global variable
-                double[] total_average_soilthickness_m_array = new double[nr];
-                int[] number_soil_thicker_than_array = new int[nr]; //race condition 2
-                int[] number_soil_coarser_than_array = new int[nr];
-                double[] local_soil_depth_m_array = new double[nr];
-                double[] local_soil_mass_kg_array = new double[nr]; //this even used?
+                
 
 
                 var options = new ParallelOptions()
@@ -11944,21 +11933,24 @@ namespace LORICA4
                 int local_soil_depth_m_col_check;
                 int.TryParse(timeseries.timeseries_soil_cell_row.Text, out local_soil_depth_m_row_check); //comes out as zero if fails
                 int.TryParse(timeseries.timeseries_soil_cell_col.Text, out local_soil_depth_m_col_check);
-
-
                 //displaysoil(0, 0);
+                //for (row = 0; row < nr; row++)
+                //{
                 depth_m = 0;
+                //parallel array holders for each global variable
+                double[] total_average_soilthickness_m_array = new double[nr];
+                int[] number_soil_thicker_than_array = new int[nr]; //race condition 2
+                int[] number_soil_coarser_than_array = new int[nr];
+                double[] local_soil_depth_m_array = new double[nr];
+                double[] local_soil_mass_kg_array = new double[nr]; //this even used?
                 Parallel.For(0, nr, options, row =>
                  {
-                     //for (row = 0; row < nr; row++)
-                     //{
-
                      double old_thickness;
                      double new_thickness;
                      double old_soil_mass;
                      double new_soil_mass;
                      for (int col = 0; col < nc; col++)
-                    {
+                     {
                         if (dtm[row, col] != -9999)
                         {
                             remove_empty_layers(row, col);
@@ -12719,24 +12711,90 @@ namespace LORICA4
             }
             return (ndn);
         }
-#region Parallel code examples
+#region Optimization code examples
         
         
-        void bad_optimization_example_1()
+        void bad_optimization_example_1() //runs in 600 [ms] SLOW !!!
+        {
+            for (int row = 0; row < nr; row++) 
+            { 
+                for (int col = 0; col < nc; col++)
+                {
+                    T_fac[row, col] = System.Convert.ToDouble(textBox_ls_trans.Text);
+                    C_fac[row, col] = System.Convert.ToDouble(textBox_ls_coh.Text);
+                    bulkd[row, col] = System.Convert.ToDouble(textBox_ls_bd.Text);
+                    intfr[row, col] = System.Convert.ToDouble(textBox_ls_ifr.Text);   
+                }
+            }
+        }
+
+        void good_optimization_example_1() //runs in a few [ms]
+        {
+            double textBox_ls_trans_value = System.Convert.ToDouble(textBox_ls_trans.Text);
+            double textBox_ls_coh_value = System.Convert.ToDouble(textBox_ls_coh.Text);
+            double textBox_ls_bd_value = System.Convert.ToDouble(textBox_ls_bd.Text);
+            double textBox_ls_ifr_value = System.Convert.ToDouble(textBox_ls_ifr.Text);
+            for (int row = 0; row < nr; row++) 
+            { 
+                for (int col = 0; col < nc; col++)
+                { //this only works if these variables are constants
+                        T_fac[row, col] = textBox_ls_trans_value;
+                        C_fac[row, col] = textBox_ls_coh_value;
+                        bulkd[row, col] = textBox_ls_bd_value;
+                        intfr[row, col] = textBox_ls_ifr_value;
+                }
+            }
+        }
+        
+        void bad_optimization_example_2() //
         {
             for (int row = 0; row < nr; row++) //<-- loop counters can't be global variable or it will cause race condition
             { //normally loops counters should not be global variables in the first place (probably slower)
                 for (int col = 0; col < nc; col++) //<-- same issue with 'col' being global variable
                 {
-                    for (int layer = 0; layer < max_soil_layers; layer++)
-                    {
-                       // if(TextBox.Text)
-                    }
+                    //try parse ??? or try-catch ?? or just repeat calculations for geomorphic processes
                 }
             }
         }
-        
-        
+
+        void good_optimization_example_2() //
+        {
+            
+            for (int row = 0; row < nr; row++) //<-- loop counters can't be global variable or it will cause race condition
+            { //normally loops counters should not be global variables in the first place (probably slower)
+                for (int col = 0; col < nc; col++) //<-- same issue with 'col' being global variable
+                {
+                    
+                }
+            }
+        }
+
+        void bad_optimization_example_3() //runs in 600 [ms] SLOW !!!
+        {
+            for (int row = 0; row < nr; row++) //
+            { //
+                for (int col = 0; col < nc; col++) //
+                {
+                    //geomorphic neighboring cell loops
+                }
+            }
+        }
+
+        void good_optimization_example_3() //runs in a few [ms]
+        {
+            for (int row = 0; row < nr; row++) //
+            { //
+                for (int col = 0; col < nc; col++) //
+                {
+                    //geomorphic neighboring cell loops
+                }
+            }
+        }
+
+        #endregion
+
+        #region Parallel code examples
+        /*
         void bad_parallel_example_1() //commonly seen 3 for-loops
         {
             int layer;
@@ -12749,9 +12807,9 @@ namespace LORICA4
                     }
                 }
             }
-        }
+        } */
 
-        void bad_parallel_example_2() //row and col are fixed but...
+        void bad_parallel_example_1() //row and col are fixed but...
         {
             int layer; // <--- issue here. Each thread will share this intance of 'layer' 
             //as the loops progress 'layer' will be overwritten and corrupting the value
@@ -12760,7 +12818,7 @@ namespace LORICA4
             var options = new ParallelOptions() { MaxDegreeOfParallelism = 6 };
             Parallel.For(0, nr, options, row =>
             {
-                for (int col = 0; col < nc; col++)
+                for (col = 0; col < nc; col++)
                 {
                     for (layer = 0; layer < max_soil_layers; layer++)
                     {
@@ -12769,7 +12827,7 @@ namespace LORICA4
             });
         }
 
-        void better_parallel_example_2() //for-loops are all fixed now
+        void good_parallel_example_1() //for-loops are all fixed now
         {
             var options = new ParallelOptions() { MaxDegreeOfParallelism = 6 };
             Parallel.For(0, nr, options, row =>
@@ -12784,7 +12842,7 @@ namespace LORICA4
             });
         }
 
-        void bad_parallel_example_3()
+        void bad_parallel_example_2()
         {
             var options = new ParallelOptions() { MaxDegreeOfParallelism = 6 };
             Parallel.For(0, nr, options, row =>
@@ -12800,20 +12858,107 @@ namespace LORICA4
             });
         }
 
-        void good_parallel_example_3() 
+        void good_parallel_example_2() 
         {
+            var options = new ParallelOptions() { MaxDegreeOfParallelism = 6 };
+            Parallel.For(0, nr, options, row =>
+            { //this is fine since 'row' index is a unique memory location that 2 threads will not conflict on
+                for (int col = 0; col < nc; col++)
+                {
+                    for (int layer = 0; layer < max_soil_layers; layer++)
+                    {   
+                        texture_kg[row, col, 0, 1] += 0.063 * dx * dx;
+                    }
+                }
+            });
+        }
+
+        
+        void fixed_parallel_example_3()
+        { //make temp array to hold parallel row results of global variable
+            double[] total_phys_weathered_mass_kg_temp = new double[nr];  
             var options = new ParallelOptions() { MaxDegreeOfParallelism = 6 };
             Parallel.For(0, nr, options, row =>
             {
                 for (int col = 0; col < nc; col++)
                 {
                     for (int layer = 0; layer < max_soil_layers; layer++)
-                    {   //this is ok since 'row' index is a unique memory location that 2 threads will not conflict on
-                        texture_kg[row, col, 0, 1] += 0.063 * dx * dx;
+                    {  //each row hold its partial sum calculation
+                        total_phys_weathered_mass_kg_temp[row] += weathered_mass_kg;
+                    }
+                }
+            });
+            for (int row = 0; row < nr; row++)
+            { //combine each rows partical sum to make a total sum
+                total_phys_weathered_mass_kg += total_phys_weathered_mass_kg_temp[row];
+            }
+        }
+
+
+        void non_parallel_example_1() //soil_bioturbation() example
+        { //these are unavoidable race conditions since they are Accumulating (+=) and the results are used in the next iterations
+            double total_young_som_kg = 0, total_old_som_kg = 0;
+            var options = new ParallelOptions() { MaxDegreeOfParallelism = 6 };
+            Parallel.For(0, nr, options, row =>
+            {
+                for (int col = 0; col < nc; col++)
+                {
+                    double lux_hornbeam_OM_litter_fraction = 0;
+                    for (int layer = 0; layer < max_soil_layers; layer++)
+                    {
+                        if (total_layer_mass(row, col, layer) > 0)  //this says: if the layer actually exists
+                        {
+                            total_young_som_kg += young_SOM_kg[row, col, layer]; // <--  (never resets to 0 or new value) ???
+                            total_old_som_kg += old_SOM_kg[row, col, layer]; // <-- same here
+                        }
+                    }
+                    //LUX: in the lux case study, we need to know how much litter is hornbeam, i.e. palatable.
+                    if (version_lux_checkbox.Checked)
+                    {
+                        if (total_young_som_kg + total_old_som_kg > 0)
+                        {
+                            lux_hornbeam_OM_litter_fraction = total_young_som_kg / (total_young_som_kg + total_old_som_kg);
+                        }
+                        else
+                        {  // ArT quickfix attempt
+                            lux_hornbeam_OM_litter_fraction = 0.5;
+                        }
                     }
                 }
             });
         }
+
+        void non_parallel_example_2() //geomorphic soil process methods
+        { // the index is sorted from low to high values, but flow goes from high to low
+            for (int runner = number_of_data_cells - 1; runner >= 0; runner--)
+            {  
+                row = row_index[runner]; col = col_index[runner];
+                if (dtm[row, col] != -9999)
+                {
+                    for (i = (-1); i <= 1; i++) //cell direction in same row
+                    {
+                        for (j = (-1); j <= 1; j++) //cell direction in same col
+                        {
+                            dh = 000000; dh1 = 000; dhtemp = -99999.99; d_x = dx;
+                            //to stay within the grid and avoid the row col cell itself
+                            if (((row + i) >= 0) && ((row + i) < nr) && ((col + j) >= 0) && ((col + j) < nc) && !((i == 0) && (j == 0)))
+                            {    // boundaries
+                                if ((dtm)[row + i, col + j] != (-9999))
+                                {
+                                    dh = ((dtm)[row, col] - (dtm)[row + i, col + j]); //interacting with other cells is a problem for
+                                    if ((row != row + i) && (col != col + j)) { d_x = dx * Math.Sqrt(2); } else { d_x = dx; }
+                                    //dtm[row, col] += dz_source;
+                                    //dtm[row + i, col + j] += dz_sink;
+                                    //dtmchange[row, col] += dz_source; //MMS
+                                    //dtmchange[row + i, col + j] += dz_sink; //MMS
+                                }//end if novalues
+                            }// end if boundaries
+                        }//end for j
+                    }//end for i
+                }
+            }
+        }
+
 
 
 
@@ -13672,7 +13817,6 @@ namespace LORICA4
                                     total_old_som_kg += old_SOM_kg[row, col, layer]; // <-- same here
                                 }
                             }
-
                             //LUX: in the lux case study, we need to know how much litter is hornbeam, i.e. palatable.
                             if (version_lux_checkbox.Checked)
                             {
@@ -13745,6 +13889,7 @@ namespace LORICA4
                                             otherdepth += layerthickness_m[row, col, otherlayer] / 2;
                                             distance = Math.Abs(otherdepth - depth);
 
+                                            /*
                                             if (distance < 0) { Debug.WriteLine(" distance between layers is 0 m at row " + row + " col " + col + " layerdepth " + depth + " otherlayerdepth " + otherdepth); }
 
                                             if (double.IsNaN(texture_kg[row, col, otherlayer, 1])) { Debug.WriteLine(" texture 1 NaN " + t + " rc " + row + "  " + col + " layers " + layer + " " + otherlayer); }
@@ -13760,13 +13905,15 @@ namespace LORICA4
                                             if ((texture_kg[row, col, otherlayer, 4] < 0)) { Debug.WriteLine(" texture 4 null " + t + " rc " + row + "  " + col + " layers " + layer + " " + otherlayer); }
                                             if ((young_SOM_kg[row, col, otherlayer] < 0)) { Debug.WriteLine(" young som null " + t + " rc " + row + "  " + col + " layers " + layer + " " + otherlayer); }
                                             if ((old_SOM_kg[row, col, otherlayer] < 0)) { Debug.WriteLine(" old som null " + t + " rc " + row + "  " + col + " layers " + layer + " " + otherlayer); }
-
+                                            */
                                             if (otherlayer != layer) { mass_distance_sum += (texture_kg[row, col, otherlayer, 1] + texture_kg[row, col, otherlayer, 2] + texture_kg[row, col, otherlayer, 3] + texture_kg[row, col, otherlayer, 4] + young_SOM_kg[row, col, otherlayer] + old_SOM_kg[row, col, otherlayer]) / distance; }
 
                                             otherdepth += layerthickness_m[row, col, otherlayer] / 2;
+                                            /*
                                             if (double.IsNaN(mass_distance_sum)) { Debug.WriteLine(" B NaN mass distance in bioturbation t " + t + " rc " + row + "  " + col + " layers " + layer + " " + otherlayer); }
                                             if (double.IsNaN(distance)) { Debug.WriteLine(" NaN  distance in bioturbation t " + t + " rc " + row + "  " + col + " layers " + layer + " " + otherlayer); }
                                             if (double.IsNaN((layerthickness_m[row, col, otherlayer] / 2))) { Debug.WriteLine(" NaN layerthick in bioturbation t " + t + " rc " + row + "  " + col + " layers " + layer + " " + otherlayer); }
+                                            */
                                         }
                                     }
                                     //double check_mass_distance = 0;
@@ -13788,15 +13935,21 @@ namespace LORICA4
                                             {
                                                 mass_distance_layer = (texture_kg[row, col, otherlayer, 1] + texture_kg[row, col, otherlayer, 2] + texture_kg[row, col, otherlayer, 3] + texture_kg[row, col, otherlayer, 4] + young_SOM_kg[row, col, otherlayer] + old_SOM_kg[row, col, otherlayer]) / (layerthickness_m[row, col, otherlayer] / 2);
                                             }
+
+                                            /*
                                             if (double.IsNaN(mass_distance_layer))
                                             {
                                                 Debug.WriteLine(" NaN mass distance layer in bioturbation t " + t + " rc " + row + "  " + col + " layers " + layer + " " + otherlayer); Debug.WriteLine("err_sbt2");
                                             }
                                             if (mass_distance_sum == 0) { Debug.WriteLine(" zero mass distance sum"); }
+                                            */
+
                                             //here we calculate the amount of material bioturbated between the current layer and the current otherlayer
                                             double interlayer_bioturbation_kg = layer_bioturbation_kg * (mass_distance_layer / mass_distance_sum);
                                             //check_mass_distance += mass_distance_layer / mass_distance_sum; //not even used???
                                             //BT_fraction += mass_distance_layer / mass_distance_sum; //not used either ???
+                                            
+                                            /*
                                             if (interlayer_bioturbation_kg < 0)
                                             {
                                                 Debug.WriteLine("err_sbt3");
@@ -13808,14 +13961,17 @@ namespace LORICA4
                                                 Debug.WriteLine("err_sbt4");
 
                                             }
+                                            */
+
                                             double fine_otherlayer_mass = texture_kg[row, col, otherlayer, 1] + texture_kg[row, col, otherlayer, 2] + texture_kg[row, col, otherlayer, 3] + texture_kg[row, col, otherlayer, 4] + young_SOM_kg[row, col, otherlayer] + old_SOM_kg[row, col, otherlayer];
+                                            /*
                                             if (double.IsNaN(fine_otherlayer_mass)) { Debug.WriteLine(" NaN fine otherlayer mass in bioturbation "); }
                                             if ((fine_otherlayer_mass <= 0))
                                             {
                                                 Debug.WriteLine(" fineotherlayermass " + fine_otherlayer_mass + " t " + t + " rc " + row + "  " + col + " layers " + layer + " " + otherlayer);
                                                 Debug.WriteLine("err_sbt5");
                                             }
-
+                                            */
                                             //weathered_mass_kg may be more than present in the other layer, the current layer, or both - in that case one or both of the layers will become mixtures of the original two layers
                                             //double fromlayertomixture_kg = 0, fromotherlayertomixture_kg = 0, totalmixturemass_kg = 0, massfromlayer = 0, massfromotherlayer = 0, dmass_l = 0, dmass_ol = 0;
                                             //fromlayertomixture_kg = 0; fromotherlayertomixture_kg = 0; totalmixturemass_kg = 0; massfromlayer = 0; massfromotherlayer = 0; dmass_l = 0; dmass_ol = 0;
@@ -13835,6 +13991,7 @@ namespace LORICA4
                                                 for (int prop = 1; prop < 5; prop++)
                                                 {
                                                     //checks
+                                                    /*
                                                     if (temp_tex_som_kg[layer, prop] < 0)
                                                     {
                                                         Debug.WriteLine("err_sbt6");
@@ -13843,6 +14000,7 @@ namespace LORICA4
                                                     {
                                                         Debug.WriteLine("err_sbt7");
                                                     }
+                                                    */
 
                                                     //determine how much mass can be exchanged,. Do not take more than is present in the temporary layer to prevent negative textures in the end
                                                     //Should not happen, mass of top layer should stay constant, but happens anyway
@@ -13860,6 +14018,7 @@ namespace LORICA4
                                                     temp_tex_som_kg[layer, prop] -= dmass_l;
                                                     temp_tex_som_kg[otherlayer, prop] -= dmass_ol;
 
+                                                    /*
                                                     if (temp_tex_som_kg[layer, prop] < 0)
                                                     {
                                                         Debug.WriteLine("err_sbt8");
@@ -13868,6 +14027,7 @@ namespace LORICA4
                                                     {
                                                         Debug.WriteLine("err_sbt9");
                                                     }
+                                                    */
 
                                                 }
                                                 //young OM
@@ -13902,6 +14062,7 @@ namespace LORICA4
                                                 temp_tex_som_kg[otherlayer, 6] -= dmass_ol;
 
                                                 // checks
+                                                /*
                                                 if (temp_tex_som_kg[layer, 5] < 0)
                                                 {
                                                     Debug.WriteLine("err_sbt10");
@@ -13910,19 +14071,22 @@ namespace LORICA4
                                                 {
                                                     Debug.WriteLine("err_sbt11");
                                                 }
-
+                                                */
                                                 //now give from mixture to receivers
                                                 totalmixturemass_kg = massfromlayer + massfromotherlayer;
+                                                /*
                                                 if (totalmixturemass_kg == 0)
                                                 {
                                                     Debug.WriteLine("err_sbt11");
                                                 }
+                                                */
 
                                                 // if (findnegativetexture()) { Debugger.Break(); }
 
 
                                                 for (int prop = 1; prop < 7; prop++)
                                                 {
+                                                    /*
                                                     if (temp_tex_som_kg[layer, prop] < 0)
                                                     {
                                                         Debug.WriteLine("err_sbt12");
@@ -13936,12 +14100,14 @@ namespace LORICA4
                                                     {
                                                         Debug.WriteLine("err_sbt14");
                                                     }
+                                                    */
                                                     temp_tex_som_kg[otherlayer, prop] += mixture_kg[prop] * (massfromotherlayer / totalmixturemass_kg);
                                                     massin_ol += mixture_kg[prop] * (massfromotherlayer / totalmixturemass_kg);
                                                     temp_tex_som_kg[layer, prop] += mixture_kg[prop] * (massfromlayer / totalmixturemass_kg);
                                                     massin_l += mixture_kg[prop] * (massfromlayer / totalmixturemass_kg);
                                                     //mixture_kg[prop] = 0;  // that's not perse needed, but feels clean
 
+                                                    /*
                                                     if (temp_tex_som_kg[layer, prop] < 0)
                                                     {
                                                         Debug.WriteLine("err_sbt15");
@@ -13950,11 +14116,13 @@ namespace LORICA4
                                                     {
                                                         Debug.WriteLine("err_sbt16");
                                                     }
+                                                    */
                                                 }
                                             }
 
 
                                             //all sorts of checks - we should never have values under zero, or NotANumber NaN
+                                            /*
                                             if (temp_tex_som_kg[otherlayer, 1] < 0)
                                             {
                                                 Debug.WriteLine(" texture 1 null " + t + " rc " + row + "  " + col + " otherlayers " + layer + " (" + total_layer_mass(row, col, layer) + "kg) " + otherlayer + " (" + total_layer_mass(row, col, otherlayer) + "kg) ");
@@ -13972,6 +14140,7 @@ namespace LORICA4
                                             if (temp_tex_som_kg[layer, 5] < 0) { Debug.WriteLine(" young som null " + t + " rc " + row + "  " + col + " layer " + layer + " " + otherlayer); }
                                             if (temp_tex_som_kg[layer, 6] < 0) { Debug.WriteLine(" old som null " + t + " rc " + row + "  " + col + " layer " + layer + " " + otherlayer); }
 
+                                            
                                             if (double.IsNaN(temp_tex_som_kg[otherlayer, 1]))
                                             {
                                                 Debug.WriteLine(" texture 1 NaN " + t + " rc " + row + "  " + col + " otherlayers " + layer + " (" + total_layer_mass(row, col, layer) + "kg) " + otherlayer + " (" + total_layer_mass(row, col, otherlayer) + "kg) ");
@@ -13988,6 +14157,7 @@ namespace LORICA4
                                             if (double.IsNaN(temp_tex_som_kg[layer, 4])) { Debug.WriteLine(" texture 4 NaN " + t + " rc " + row + "  " + col + " layer " + layer + " " + otherlayer); }
                                             if (double.IsNaN(temp_tex_som_kg[layer, 5])) { Debug.WriteLine(" young som NaN " + t + " rc " + row + "  " + col + " layer " + layer + " " + otherlayer); }
                                             if (double.IsNaN(temp_tex_som_kg[layer, 6])) { Debug.WriteLine(" old som NaN " + t + " rc " + row + "  " + col + " layer " + layer + " " + otherlayer); }
+                                            */
                                         }
                                         otherdepth += layerthickness_m[row, col, otherlayer] / 2;
                                     }
@@ -21209,12 +21379,12 @@ Example: rainfall.asc can look like:
                 try
                 {
                     //Debug.WriteLine("writing all soils");
-                    /*
-                    if ((run_number == maxruns - 1) && (t == end_time - 1)) //maybe double check to see if it hits the last run properly
+                    
+                    if ((run_number == maxruns - 1)) //only writeallsoils() on last run
                     {
                         writeallsoils();
                     }
-                    */
+                    
                     writeallsoils();
                 }
                 catch
